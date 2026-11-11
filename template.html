@@ -238,7 +238,7 @@
   /* ---------- acordes y transposición ---------- */
   var SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
   var FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
-  var CH = '([A-G][#b]?)((?:maj|min|m|dim|aug|sus|add)?\\d*)(?:\\/([A-G][#b]?))?(\\(\\*\\)|\\*)?';
+  var CH = '([A-G][#b]?)((?:maj|min|m|dim|aug|sus|add|\\d)*)(?:\\/([A-G][#b]?))?(\\(\\*\\)|\\*)?';
   // token de acordes: "Am", "F#(*)", "Cm*", "G-A-D", "Bm-C#m", "(A", "A)", "Em,"
   var CHORDTOK = new RegExp('^\\(?' + CH + '(?:-' + CH + ')*\\)?,?$');
   var CHORDG = new RegExp(CH, 'g');
