@@ -69,3 +69,9 @@ Cuando `importar.py` importa una canción de un artista que todavía no está en
 - Es automático y puede equivocarse o no encontrar nada (en ese caso queda la inicial y el script lo avisa). Para cambiarla, poné tu propio archivo en `logos/` con el nombre del artista (reemplaza el que bajó solo).
 - Las imágenes `.jpg` (fotos) se muestran llenando el círculo; las `.png`/`.svg` (logos) se muestran enteras con un margen.
 - Para saltearlo: `python3 importar.py --sin-fotos`.
+
+## Diagramas de acordes
+
+En una canción, tocá cualquier acorde (por ejemplo la `C`) y se abre una ventana con las distintas formas de tocarlo: la común (abierta) y las versiones con cejilla (forma de Mi, con la raíz en la 6ª cuerda, y forma de La, con la raíz en la 5ª), con el traste donde va cada una, las notas del acorde y su nombre en cifrado latino. Si la canción está transpuesta, muestra el acorde que ves en pantalla.
+
+Los diagramas se calculan solos para cualquier tono. Cubren acordes mayores, menores, 7, m7, maj7, sus4, sus2, dim y 5; para otros (9, add9, etc.) dice que todavía no hay diagrama. Las formas están en `template.html` (`OPEN`, `SHAPES_E`, `SHAPES_A`).

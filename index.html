@@ -212,6 +212,40 @@
   #as .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
   #as .dots i.on { background: var(--accent); }
 
+  /* ---------- acordes tocables + ventana de diagramas ---------- */
+  pre .ch { cursor: pointer; border-radius: 3px; }
+  pre .ch:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+  .cd { position: fixed; inset: 0; z-index: 30; display: flex; align-items: flex-end; justify-content: center; }
+  .cd[hidden] { display: none; }
+  .cd-bg { position: absolute; inset: 0; background: rgba(0,0,0,.5); animation: fade .15s ease-out; }
+  .cd-box {
+    position: relative; width: 100%; max-width: 640px; max-height: 88vh; overflow-y: auto;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 22px 22px 0 0;
+    padding: 18px 18px calc(20px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(0,0,0,.35);
+    animation: up .2s ease-out;
+  }
+  @media (min-width: 700px) { .cd { align-items: center; } .cd-box { border-radius: 22px; } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .cd-bg, .cd-box { animation: none; } }
+  .cd-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .cd-head h2 { margin: 0; font: 700 34px/1 var(--serif); color: var(--accent); }
+  .cd-x { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 22px; line-height: 1; }
+  .cd-notes { color: var(--muted); margin: 6px 0 14px; font-size: 14px; }
+  .cd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 10px; }
+  .cd-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px 6px 12px; text-align: center; }
+  .cd-card svg { width: 100%; max-width: 112px; height: auto; display: block; margin: 0 auto; }
+  .cd-card .cap { font-size: 12px; line-height: 1.3; margin-top: 4px; padding: 0 4px; }
+  .cd-card .cap b { display: block; font-size: 13px; }
+  .cd-card .cap span { color: var(--muted); }
+  .cd-card .fr { font: 600 12px var(--mono); color: var(--accent); margin-top: 2px; }
+  .cd-foot { color: var(--muted); font-size: 12px; margin: 14px 0 0; }
+  .g-line { stroke: var(--muted); stroke-width: 1; }
+  .g-nut { stroke: var(--ink); stroke-width: 3.5; }
+  .g-dot { fill: var(--accent); }
+  .g-open { fill: none; stroke: var(--ink); stroke-width: 1.4; }
+  .g-x { stroke: var(--ink); stroke-width: 1.4; }
+  .g-txt { fill: var(--muted); font: 600 10px var(--sans); }
   footer { text-align: center; color: var(--muted); font-size: 13px; padding: 0 16px 32px; }
 </style>
 </head>
@@ -225,6 +259,16 @@
 </header>
 <main id="app"></main>
 <footer id="foot"></footer>
+
+<div class="cd" id="cd" hidden>
+  <div class="cd-bg" id="cd-bg"></div>
+  <div class="cd-box" role="dialog" aria-modal="true" aria-labelledby="cd-t">
+    <div class="cd-head"><h2 id="cd-t"></h2><button class="cd-x" id="cd-x" aria-label="Cerrar">×</button></div>
+    <div class="cd-notes" id="cd-notes"></div>
+    <div class="cd-grid" id="cd-grid"></div>
+    <p class="cd-foot">Cuerdas de la 6ª (grave, a la izquierda) a la 1ª (aguda). ○ = al aire, × = no se toca.</p>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -298,10 +342,19 @@
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
+  function chordLineHtml(text) {
+    return text.split(/(\s+)/).map(function (tok) {
+      if (!tok || /^\s+$/.test(tok)) return tok;
+      if (!CHORDTOK.test(tok)) return esc(tok);
+      return tok.replace(CHORDG, function (m, root, qual, bass) {
+        return '<span class="ch" data-c="' + esc(root + qual + (bass ? '/' + bass : '')) + '">' + esc(m) + '</span>';
+      });
+    }).join('');
+  }
   function renderBody(body, by) {
     return body.split('\n').map(function (line) {
       if (isChordLine(line)) {
-        return '<span class="c">' + esc(by ? transposeLine(line, by) : line) + '</span>';
+        return '<span class="c">' + chordLineHtml(by ? transposeLine(line, by) : line) + '</span>';
       }
       if (/^\s*(ESTRIBILLO|VERSO|PUENTE|INTRO|SOLO|CORO)\b/.test(line)) {
         return '<span class="s">' + esc(line) + '</span>';
@@ -317,6 +370,123 @@
   function norm(s) {
     return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   }
+
+  /* ---------- diagramas de acordes ---------- */
+  // Frets de la cuerda 6 (grave) a la 1 (aguda). -1 = no se toca, 0 = al aire.
+  var OPEN = {
+    'C': [['x32010']], 'C7': [['x32310']], 'Cmaj7': [['x32000']],
+    'D': [['xx0232']], 'Dm': [['xx0231']], 'D7': [['xx0212']], 'Dmaj7': [['xx0222']], 'Dm7': [['xx0211']],
+    'Dsus4': [['xx0233']], 'Dsus2': [['xx0230']],
+    'E': [['022100']], 'Em': [['022000']], 'E7': [['020100']], 'Em7': [['022030'], ['020000']],
+    'Emaj7': [['021100']], 'Esus4': [['022200']],
+    'F': [['xx3211', 'versión simple']], 'Fmaj7': [['xx3210']],
+    'G': [['320003'], ['320033']], 'G7': [['320001']], 'Gmaj7': [['320002']],
+    'A': [['x02220']], 'Am': [['x02210']], 'A7': [['x02020']], 'Am7': [['x02010']], 'Amaj7': [['x02120']],
+    'Asus4': [['x02230']], 'Asus2': [['x02200']],
+    'B7': [['x21202']], 'Bm7': [['x20202']]
+  };
+  // Formas móviles (con cejilla), en trastes relativos a la cejilla.
+  var SHAPES_E = {   // raíz en la 6ª cuerda
+    '': [0,2,2,1,0,0], 'm': [0,2,2,0,0,0], '7': [0,2,0,1,0,0], 'm7': [0,2,0,0,0,0],
+    'maj7': [0,2,1,1,0,0], 'sus4': [0,2,2,2,0,0], '5': [0,2,2,-1,-1,-1]
+  };
+  var SHAPES_A = {   // raíz en la 5ª cuerda
+    '': [-1,0,2,2,2,0], 'm': [-1,0,2,2,1,0], '7': [-1,0,2,0,2,0], 'm7': [-1,0,2,0,1,0],
+    'maj7': [-1,0,2,1,2,0], 'sus4': [-1,0,2,2,3,0], 'sus2': [-1,0,2,2,0,0], 'dim': [-1,0,1,2,1,-1],
+    '5': [-1,0,2,2,-1,-1]
+  };
+  var QUAL_ALIAS = { 'maj': '', 'min': 'm', 'sus': 'sus4', 'M7': 'maj7' };
+  var INTERVALS = {
+    '': [0,4,7], 'm': [0,3,7], '7': [0,4,7,10], 'm7': [0,3,7,10], 'maj7': [0,4,7,11],
+    'sus4': [0,5,7], 'sus2': [0,2,7], 'dim': [0,3,6], 'aug': [0,4,8], '5': [0,7],
+    '6': [0,4,7,9], 'm6': [0,3,7,9], '9': [0,4,7,10,2], 'add9': [0,4,7,2], 'm9': [0,3,7,10,2], 'dim7': [0,3,6,9]
+  };
+  var NOTE_ES = { 'C': 'Do', 'D': 'Re', 'E': 'Mi', 'F': 'Fa', 'G': 'Sol', 'A': 'La', 'B': 'Si' };
+
+  function parseChord(name) {
+    var m = /^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/.exec(name);
+    if (!m) return null;
+    var q = m[2] in QUAL_ALIAS ? QUAL_ALIAS[m[2]] : m[2];
+    return { root: m[1], qual: q, bass: m[3] || '' };
+  }
+  function fromStr(str) {
+    return str.split('').map(function (c) { return c === 'x' ? -1 : parseInt(c, 10); });
+  }
+  function dedupe(list) {
+    var seen = {};
+    return list.filter(function (v) { var k = v.frets.join(','); return seen[k] ? false : (seen[k] = true); });
+  }
+  function variants(ch) {
+    var out = [], root = idx(ch.root);
+    if (root < 0) return out;
+    var natural = ch.root.length === 1 ? ch.root : '';
+    var key = natural + ch.qual;
+    (OPEN[key] || []).forEach(function (o, i) {
+      out.push({ title: i === 0 ? 'Común (abierto)' : 'Otra forma abierta', sub: o[1] || '', frets: fromStr(o[0]) });
+    });
+    [['E', SHAPES_E, 4, 'Mi', 6], ['A', SHAPES_A, 9, 'La', 5]].forEach(function (f) {
+      var shape = f[1][ch.qual];
+      if (!shape) return;
+      var fret = ((root - f[2]) % 12 + 12) % 12;
+      if (fret === 0) return;                          // sería el acorde abierto
+      var frets = shape.map(function (x) { return x < 0 ? -1 : x + fret; });
+      var first = f[4] === 6 ? 0 : 1;
+      out.push({
+        title: 'Con cejilla', sub: 'forma de ' + f[3] + ' · traste ' + fret, frets: frets,
+        barre: { fret: fret, from: first, to: 5 }
+      });
+    });
+    return dedupe(out);
+  }
+  function chordNotes(ch) {
+    var iv = INTERVALS[ch.qual];
+    if (!iv) return '';
+    var r = idx(ch.root), scale = ch.root.indexOf('b') > 0 ? FLAT : SHARP;
+    return iv.map(function (i) { return scale[(r + i) % 12]; }).join(' · ');
+  }
+  function diagram(v) {
+    var X0 = 22, GAP = 14, Y0 = 28, FG = 18;
+    var pressed = v.frets.filter(function (f) { return f > 0; });
+    var maxF = Math.max.apply(null, pressed.concat([0])), minF = Math.min.apply(null, pressed.concat([99]));
+    var base = maxF <= 5 ? 1 : minF;
+    var g = '';
+    for (var i = 0; i < 6; i++) g += '<line class="g-line" x1="' + (X0 + i * GAP) + '" y1="' + Y0 + '" x2="' + (X0 + i * GAP) + '" y2="' + (Y0 + 5 * FG) + '"/>';
+    for (var k = 0; k <= 5; k++) {
+      g += '<line class="' + (k === 0 && base === 1 ? 'g-nut' : 'g-line') + '" x1="' + X0 + '" y1="' + (Y0 + k * FG) + '" x2="' + (X0 + 5 * GAP) + '" y2="' + (Y0 + k * FG) + '"/>';
+    }
+    if (base > 1) g += '<text class="g-txt" x="2" y="' + (Y0 + FG * 0.7) + '">' + base + 'ª</text>';
+    if (v.barre) {
+      var by = Y0 + (v.barre.fret - base + 0.5) * FG;
+      g += '<rect class="g-dot" x="' + (X0 + v.barre.from * GAP - 6) + '" y="' + (by - 6) + '" width="' + ((v.barre.to - v.barre.from) * GAP + 12) + '" height="12" rx="6"/>';
+    }
+    v.frets.forEach(function (f, i) {
+      var cx = X0 + i * GAP;
+      if (f < 0) g += '<path class="g-x" d="M' + (cx - 4) + ' ' + (Y0 - 14) + 'l8 8m0 -8l-8 8"/>';
+      else if (f === 0) g += '<circle class="g-open" cx="' + cx + '" cy="' + (Y0 - 10) + '" r="4"/>';
+      else if (!v.barre || f !== v.barre.fret || i < v.barre.from) g += '<circle class="g-dot" cx="' + cx + '" cy="' + (Y0 + (f - base + 0.5) * FG) + '" r="6"/>';
+    });
+    return '<svg viewBox="0 0 112 128" role="img" aria-label="Diagrama del acorde">' + g + '</svg>';
+  }
+  function openChord(name) {
+    var ch = parseChord(name);
+    if (!ch) return;
+    scStop();
+    var vs = variants(ch);
+    document.getElementById('cd-t').textContent = name;
+    var notes = chordNotes(ch);
+    var rootEs = NOTE_ES[ch.root.charAt(0)] + ch.root.slice(1);
+    document.getElementById('cd-notes').textContent = (notes ? 'Notas: ' + notes + ' · ' : '') + 'en cifrado latino: ' + rootEs + (ch.qual || '') +
+      (ch.bass ? ' (con ' + ch.bass + ' en el bajo)' : '');
+    document.getElementById('cd-grid').innerHTML = vs.length ? vs.map(function (v) {
+      var fr = v.frets.map(function (f) { return f < 0 ? 'x' : f; }).join(' ');
+      return '<div class="cd-card">' + diagram(v) + '<div class="cap"><b>' + esc(v.title) + '</b>' +
+        (v.sub ? '<span>' + esc(v.sub) + '</span>' : '') + '</div><div class="fr">' + esc(fr) + '</div></div>';
+    }).join('') : '<p class="cd-notes">Todavía no tengo diagramas para este acorde.</p>';
+    var box = document.getElementById('cd');
+    box.hidden = false;
+    document.getElementById('cd-x').focus();
+  }
+  function closeChord() { document.getElementById('cd').hidden = true; }
 
   /* ---------- datos ---------- */
   var NO_ARTIST = 'Sin artista';
@@ -609,6 +779,13 @@
     }
   });
 
+  app.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('.ch') : null;
+    if (t) openChord(t.getAttribute('data-c'));
+  });
+  document.getElementById('cd-x').onclick = closeChord;
+  document.getElementById('cd-bg').onclick = closeChord;
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeChord(); });
   document.getElementById('brand').onclick = function () { state.q = ''; goHome(); };
   document.getElementById('back').onclick = function () {
     if (state.view === 'song') goArtist(state.artist); else goHome();
