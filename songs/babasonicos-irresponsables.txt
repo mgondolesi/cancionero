@@ -1,6 +1,6 @@
 ---
 title: Irresponsables
-artist: (completar)
+artist: Babasónicos
 key: Em
 ---
 Em

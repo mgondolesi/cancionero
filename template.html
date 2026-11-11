@@ -103,10 +103,10 @@
   var CH = '([A-G][#b]?)((?:maj|min|m|dim|aug|sus|add)?\\d*)(?:\\/([A-G][#b]?))?(\\(\\*\\)|\\*)?';
   var CHORD = new RegExp('^' + CH + '$');
   // token de acordes: "Am", "F#(*)", "Cm*", "G-A-D", "Bm-C#m", "Em,"
-  var CHORDTOK = new RegExp('^' + CH + '(?:-' + CH + ')*,?$');
+  var CHORDTOK = new RegExp('^\\(?' + CH + '(?:-' + CH + ')*\\)?,?$');
   var CHORDG = new RegExp(CH, 'g');
   var LABEL = /^[A-Za-zñÑ]+:$/;
-  var FILLER = /^(-+|[xX]\d*|\(?[xX]\d*\)?|\d+\)?|\||\(|\))$/;
+  var FILLER = /^(-+|\(?[xX]\d*\)?|\d+\)?|\(\d+|veces\)?|[Rr]iff|\||\(|\))$/;
 
   function idx(n) {
     var i = SHARP.indexOf(n);

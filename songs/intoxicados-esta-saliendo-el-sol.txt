@@ -1,6 +1,6 @@
 ---
 title: Está saliendo el sol
-artist: (completar)
+artist: Intoxicados
 key: A
 ---
 Intro en LA
