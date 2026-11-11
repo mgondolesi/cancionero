@@ -32,6 +32,13 @@ armá la página y subila a `main`. Pasos:
 Si el usuario pega varias canciones juntas, repetí el proceso con cada una (un commit
 por canción o uno solo, como sea más simple).
 
+## Logos de las bandas
+
+Si el usuario manda la imagen del logo de una banda, guardala en `logos/` con el nombre del
+artista en minúsculas, sin tildes y con guiones (`los-piojos.png`), achicala a unos 200x200 px
+si pesa mucho, corré `python3 build.py`, probá en el navegador que se vea bien y subila a `main`.
+No descargues logos de la web: solo los que el usuario manda.
+
 ## Reglas
 
 - **No copies letras ni acordes de ninguna web.** Solo se agrega lo que el usuario pega o

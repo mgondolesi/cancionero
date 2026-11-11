@@ -53,3 +53,11 @@ La Action corre `importar.py`: limpia el texto (menús, puntajes, "Enviado por",
 Si el nombre no tiene " - ", intenta sacar título y artista de los dos primeros links del texto copiado. Si no puede, deja un aviso amarillo en Actions y el archivo queda en `inbox/`.
 
 Para probarlo en la compu: `python3 importar.py --dry-run` (simulación) o `python3 importar.py`.
+
+## Logos de las bandas
+
+Si hay una imagen en `logos/` con el nombre del artista, la página la usa en lugar de la inicial. Si no hay, queda la inicial.
+
+- Nombre del archivo: el artista en minúsculas, sin tildes y con guiones: `los-piojos.png`, `babasonicos.png`, `ella-es-tan-cargosa.png`. Sirve `.png`, `.jpg`, `.webp` o `.svg`.
+- Tamaño: unos 200x200 px alcanza (el logo se guarda dentro del HTML; `build.py` avisa si pesa más de 200 KB).
+- Si el nombre no coincide con ningún artista, `build.py` avisa y lo ignora.

@@ -12,6 +12,7 @@ Cada canción es un .txt con encabezado opcional entre '---':
 
 Uso: python3 build.py
 """
+import base64
 import difflib
 import json
 import os
@@ -24,6 +25,9 @@ ROOT = Path(__file__).parent
 SONGS_DIR = ROOT / "songs"
 TEMPLATE = ROOT / "template.html"
 OUT = ROOT / "index.html"
+LOGOS_DIR = ROOT / "logos"
+MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+        ".webp": "image/webp", ".svg": "image/svg+xml", ".gif": "image/gif"}
 
 
 def parse(path: Path) -> dict:
@@ -86,6 +90,32 @@ def check_duplicates(songs: list) -> int:
     return found
 
 
+def logo_slug(artist: str) -> str:
+    """'Los Piojos' -> 'los-piojos' (así se tiene que llamar el archivo del logo)."""
+    return norm(artist).replace(" ", "-")
+
+
+def load_logos(songs: list) -> dict:
+    """Busca logos/<artista>.png|jpg|webp|svg y los devuelve como data URI (queda todo en un solo HTML)."""
+    if not LOGOS_DIR.exists():
+        return {}
+    by_slug = {logo_slug(s["artist"]): s["artist"] for s in songs if s["artist"]}
+    out = {}
+    for f in sorted(LOGOS_DIR.iterdir()):
+        if f.suffix.lower() not in MIME:
+            continue
+        artist = by_slug.get(f.stem.lower())
+        if not artist:
+            warn(f"Logo sin artista: logos/{f.name} (no hay canciones de un artista llamado así; "
+                 f"el nombre del archivo tiene que ser como '{next(iter(by_slug), 'los-piojos')}.png')")
+            continue
+        data = f.read_bytes()
+        if len(data) > 200_000:
+            warn(f"logos/{f.name} pesa {len(data) // 1000} KB; conviene achicarlo (unos 200x200 px) para que el HTML no engorde.")
+        out[artist] = f"data:{MIME[f.suffix.lower()]};base64," + base64.b64encode(data).decode()
+    return out
+
+
 def main() -> None:
     files = sorted(SONGS_DIR.glob("*.txt"))
     songs = [parse(p) for p in files]
@@ -96,8 +126,14 @@ def main() -> None:
     if marker not in html:
         sys.exit("template.html: falta el marcador de canciones")
     data = json.dumps(songs, ensure_ascii=False).replace("</", "<\\/")
-    OUT.write_text(html.replace(marker, data), encoding="utf-8")
-    print(f"{len(songs)} canciones -> {OUT.name}")
+    html = html.replace(marker, data)
+    lmark = "/*LOGOS_JSON*/{}/*END_LOGOS*/"
+    if lmark not in html:
+        sys.exit("template.html: falta el marcador de logos")
+    logos = load_logos(songs)
+    html = html.replace(lmark, json.dumps(logos, ensure_ascii=False))
+    OUT.write_text(html, encoding="utf-8")
+    print(f"{len(songs)} canciones, {len(logos)} logos -> {OUT.name}")
 
 
 if __name__ == "__main__":

@@ -94,6 +94,9 @@
     color: hsl(var(--h) var(--av-fg-s) var(--av-fg-l));
   }
 
+  .av.logo { background: #fff; border: 1px solid var(--line); overflow: hidden; padding: calc(var(--s, 48px) * .12); }
+  .av.logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
   /* ---------- inicio ---------- */
   .hero { padding: 8px 0 20px; }
   .hero h1 { font: 700 clamp(30px, 7vw, 44px)/1.08 var(--serif); margin: 0 0 6px; letter-spacing: -.3px; }
@@ -224,6 +227,7 @@
 <script>
 (function () {
   var SONGS = /*SONGS_JSON*/[]/*END_SONGS*/;
+  var LOGOS = /*LOGOS_JSON*/{}/*END_LOGOS*/;   // logos de las bandas (opcional)
   var app = document.getElementById('app');
   var state = { view: 'home', artist: '', song: '', transpose: 0, fs: 15, q: '' };
 
@@ -343,7 +347,9 @@
     return out.toUpperCase();
   }
   function avatar(name, size) {
-    return '<span class="av" style="--h:' + hue(name) + ';--s:' + size + 'px" aria-hidden="true">' + esc(initials(name)) + '</span>';
+    var st = 'style="--h:' + hue(name) + ';--s:' + size + 'px"';
+    if (LOGOS[name]) return '<span class="av logo" ' + st + ' aria-hidden="true"><img src="' + LOGOS[name] + '" alt=""></span>';
+    return '<span class="av" ' + st + ' aria-hidden="true">' + esc(initials(name)) + '</span>';
   }
   function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
 
