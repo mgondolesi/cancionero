@@ -25,3 +25,15 @@ Archivos: `template.html` es el código de la página, `index.html` se genera so
 ## Publicar en GitHub Pages (una sola vez)
 
 Settings → Pages → Source: **GitHub Actions**.
+
+## Completar acordes de estrofas repetidas
+
+Si una canción trae los acordes solo en la primera estrofa y las siguientes vienen sin acordes, `fill_chords.py` los copia (mismas columnas, misma cantidad de líneas, misma sección):
+
+```bash
+python3 fill_chords.py            # simulación: muestra qué completaría
+python3 fill_chords.py --write    # aplica los cambios
+python3 fill_chords.py songs/archivo.txt --write   # una sola canción
+```
+
+Conviene revisar el resultado: los acordes quedan aproximadamente sobre las mismas sílabas, no exactamente.
