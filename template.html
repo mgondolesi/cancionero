@@ -100,7 +100,7 @@
   var SONGS = /*SONGS_JSON*/[]/*END_SONGS*/;
   var app = document.getElementById('app');
   var q = document.getElementById('q');
-  var state = { transpose: 0, fs: 15, artist: '' };
+  var state = { transpose: 0, fs: 15, artist: '', current: '' };
 
   function store(k, v) {
     try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {}
@@ -204,12 +204,12 @@
   }
   function setArtist(a) {
     state.artist = a;
-    if (location.hash) location.hash = ''; else showList();
+    navigate('');
   }
 
   /* ---------- deslizamiento automático ---------- */
   var SPEEDS = [0, 8, 16, 28, 44, 64];            // px/seg por nivel (1-5)
-  var sc = { on: false, level: 2, raf: 0, last: 0, acc: 0 };
+  var sc = { on: false, level: 2, raf: 0, last: 0, pos: 0 };
   sc.level = parseInt(store('lvl'), 10) || 2;
   function barUpdate() {
     var el = document.getElementById('as');
@@ -217,22 +217,22 @@
     el.querySelector('[data-p]').textContent = sc.on ? '⏸' : '▶';
     el.querySelector('.lv').textContent = 'Nivel ' + sc.level;
   }
+  // Llevamos la posición en una variable propia (con decimales): en el celu
+  // scrollBy redondea y los avances chicos se perdían.
   function scLoop(t) {
     if (!sc.on) return;
-    sc.acc += SPEEDS[sc.level] * (t - sc.last) / 1000;
+    if (!sc.last) sc.last = t;
+    var dt = Math.min(t - sc.last, 100) / 1000;
     sc.last = t;
-    var px = Math.floor(sc.acc);
-    if (px >= 1) {
-      sc.acc -= px;
-      var before = window.scrollY;
-      window.scrollBy(0, px);
-      if (Math.abs(window.scrollY - before) < 1) { scStop(); return; }   // llegó al final
-    }
+    sc.pos += SPEEDS[sc.level] * dt;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    if (sc.pos >= max) { window.scrollTo(0, max); scStop(); return; }   // llegó al final
+    window.scrollTo(0, sc.pos);
     sc.raf = requestAnimationFrame(scLoop);
   }
   function scStart() {
     if (sc.on) return;
-    sc.on = true; sc.acc = 0; sc.last = performance.now();
+    sc.on = true; sc.last = 0; sc.pos = window.scrollY;
     sc.raf = requestAnimationFrame(scLoop);
     barUpdate();
   }
@@ -241,9 +241,13 @@
     cancelAnimationFrame(sc.raf);
     barUpdate();
   }
-  ['wheel', 'touchmove'].forEach(function (ev) {
-    window.addEventListener(ev, function () { if (sc.on) scStop(); }, { passive: true });
-  });
+  // Se frena si el usuario desliza a mano. Un toque (con temblor de dedo) no cuenta.
+  var touchY = 0;
+  window.addEventListener('wheel', function () { if (sc.on) scStop(); }, { passive: true });
+  window.addEventListener('touchstart', function (e) { touchY = e.touches[0].clientY; }, { passive: true });
+  window.addEventListener('touchmove', function (e) {
+    if (sc.on && Math.abs(e.touches[0].clientY - touchY) > 12) scStop();
+  }, { passive: true });
   function showList() {
     var list = filtered();
     var html = '';
@@ -259,13 +263,16 @@
     html += '<div class="count">' + list.length + ' de ' + SONGS.length + ' canciones</div>';
     if (!list.length) html += '<div class="empty">No hay resultados</div>';
     list.forEach(function (s) {
-      html += '<a class="item" href="#' + encodeURIComponent(s.id) + '">' +
+      html += '<a class="item" data-id="' + esc(s.id) + '" href="#' + encodeURIComponent(s.id) + '">' +
         '<span><span class="t">' + esc(s.title) + '</span><br><span class="a">' + esc(s.artist) + '</span></span>' +
         '<span class="k">' + esc(s.key) + '</span></a>';
     });
     app.innerHTML = html;
     app.querySelectorAll('.chip').forEach(function (b) {
       b.onclick = function () { setArtist(b.getAttribute('data-a')); };
+    });
+    app.querySelectorAll('.item').forEach(function (a) {
+      a.onclick = function (e) { e.preventDefault(); navigate(a.getAttribute('data-id')); };
     });
   }
   function showSong(s) {
@@ -297,7 +304,7 @@
         barUpdate();
       };
     });
-    document.getElementById('back').onclick = function () { location.hash = ''; };
+    document.getElementById('back').onclick = function () { navigate(''); };
     document.getElementById('again').onclick = function () { randomSong(s.id); };
     app.querySelectorAll('[data-t]').forEach(function (b) {
       b.onclick = function () {
@@ -315,29 +322,40 @@
     });
     document.title = s.title + ' — Cancionero';
   }
-  function route() {
+  // La navegación NO depende del hash: al abrir el archivo desde WhatsApp u otras
+  // apps, el hash puede no funcionar. El hash se usa solo como extra (botón atrás).
+  function render() {
     scStop();
-    var id = decodeURIComponent(location.hash.replace(/^#/, ''));
-    var s = SONGS.filter(function (x) { return x.id === id; })[0];
+    var s = SONGS.filter(function (x) { return x.id === state.current; })[0];
     if (s) { showSong(s); window.scrollTo(0, 0); }
     else { document.title = 'Cancionero'; showList(); }
+  }
+  function navigate(id) {
+    state.current = id || '';
+    state.transpose = 0;
+    render();
+    try {
+      var h = id ? '#' + encodeURIComponent(id) : '';
+      if (location.hash !== h) location.hash = h;
+    } catch (e) {}
+  }
+  function hashId() {
+    try { return decodeURIComponent(location.hash.replace(/^#/, '')); } catch (e) { return ''; }
   }
   function randomSong(exceptId) {
     var pool = filtered();
     if (pool.length > 1 && exceptId) pool = pool.filter(function (s) { return s.id !== exceptId; });
     if (!pool.length) return;
-    var s = pool[Math.floor(Math.random() * pool.length)];
-    state.transpose = 0;
-    if (location.hash === '#' + encodeURIComponent(s.id)) route();
-    else location.hash = encodeURIComponent(s.id);
+    navigate(pool[Math.floor(Math.random() * pool.length)].id);
   }
 
-  window.addEventListener('hashchange', function () { state.transpose = 0; route(); });
-  q.addEventListener('input', function () {
-    if (location.hash) location.hash = ''; else showList();
+  window.addEventListener('hashchange', function () {
+    var id = hashId();
+    if (id !== state.current) { state.current = id; state.transpose = 0; render(); }
   });
+  q.addEventListener('input', function () { navigate(''); });
   document.getElementById('rand').onclick = function () { randomSong(); };
-  document.getElementById('home').onclick = function () { q.value = ''; state.artist = ''; location.hash = ''; showList(); };
+  document.getElementById('home').onclick = function () { q.value = ''; state.artist = ''; navigate(''); };
   document.getElementById('theme').onclick = function () {
     var el = document.documentElement;
     var dark = el.getAttribute('data-theme') === 'dark' ||
@@ -347,7 +365,8 @@
     store('theme', next);
   };
   document.getElementById('foot').textContent = SONGS.length + ' canciones';
-  route();
+  state.current = hashId();
+  render();
 })();
 </script>
 </body>
