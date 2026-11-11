@@ -62,11 +62,24 @@
   .tools .val { min-width: 3.2em; text-align: center; font-weight: 600; }
   pre {
     margin: 0; padding: 16px; overflow-x: auto; background: var(--card);
-    border: 1px solid var(--line); border-radius: 10px; font-size: var(--fs, 15px);
+    border: 1px solid var(--line); border-radius: 10px; font-size: var(--fs, 15px); margin-bottom: 90px;
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; line-height: 1.35;
   }
   pre .c { color: var(--chord); font-weight: 700; }
   pre .s { color: var(--muted); font-weight: 600; }
+  .chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 4px; }
+  .chip { white-space: nowrap; border-radius: 999px; padding: 5px 12px; font-size: 14px; }
+  .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .alink { background: none; border: 0; padding: 0; color: var(--muted); cursor: pointer; font: inherit; text-decoration: underline dotted; }
+  .alink:hover { color: var(--accent); }
+  #as {
+    position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 6;
+    display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: var(--card);
+    border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  }
+  #as button { border-radius: 999px; min-width: 38px; padding: 7px 10px; }
+  #as .lv { min-width: 4.5em; text-align: center; font-size: 14px; color: var(--muted); }
+  #as button.play { background: var(--accent); color: #fff; border-color: var(--accent); }
   footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 0 40px; }
 </style>
 </head>
@@ -87,7 +100,7 @@
   var SONGS = /*SONGS_JSON*/[]/*END_SONGS*/;
   var app = document.getElementById('app');
   var q = document.getElementById('q');
-  var state = { transpose: 0, fs: 15 };
+  var state = { transpose: 0, fs: 15, artist: '' };
 
   function store(k, v) {
     try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {}
@@ -178,14 +191,72 @@
   /* ---------- vistas ---------- */
   function filtered() {
     var t = norm(q.value.trim());
-    if (!t) return SONGS;
     return SONGS.filter(function (s) {
-      return norm(s.title + ' ' + s.artist + ' ' + s.body).indexOf(t) >= 0;
+      if (state.artist && s.artist !== state.artist) return false;
+      return !t || norm(s.title + ' ' + s.artist + ' ' + s.body).indexOf(t) >= 0;
     });
   }
+  function artists() {
+    var c = {};
+    SONGS.forEach(function (s) { if (s.artist) c[s.artist] = (c[s.artist] || 0) + 1; });
+    return Object.keys(c).sort(function (a, b) { return norm(a) < norm(b) ? -1 : 1; })
+      .map(function (a) { return { name: a, n: c[a] }; });
+  }
+  function setArtist(a) {
+    state.artist = a;
+    if (location.hash) location.hash = ''; else showList();
+  }
+
+  /* ---------- deslizamiento automático ---------- */
+  var SPEEDS = [0, 8, 16, 28, 44, 64];            // px/seg por nivel (1-5)
+  var sc = { on: false, level: 2, raf: 0, last: 0, acc: 0 };
+  sc.level = parseInt(store('lvl'), 10) || 2;
+  function barUpdate() {
+    var el = document.getElementById('as');
+    if (!el) return;
+    el.querySelector('[data-p]').textContent = sc.on ? '⏸' : '▶';
+    el.querySelector('.lv').textContent = 'Nivel ' + sc.level;
+  }
+  function scLoop(t) {
+    if (!sc.on) return;
+    sc.acc += SPEEDS[sc.level] * (t - sc.last) / 1000;
+    sc.last = t;
+    var px = Math.floor(sc.acc);
+    if (px >= 1) {
+      sc.acc -= px;
+      var before = window.scrollY;
+      window.scrollBy(0, px);
+      if (Math.abs(window.scrollY - before) < 1) { scStop(); return; }   // llegó al final
+    }
+    sc.raf = requestAnimationFrame(scLoop);
+  }
+  function scStart() {
+    if (sc.on) return;
+    sc.on = true; sc.acc = 0; sc.last = performance.now();
+    sc.raf = requestAnimationFrame(scLoop);
+    barUpdate();
+  }
+  function scStop() {
+    sc.on = false;
+    cancelAnimationFrame(sc.raf);
+    barUpdate();
+  }
+  ['wheel', 'touchmove'].forEach(function (ev) {
+    window.addEventListener(ev, function () { if (sc.on) scStop(); }, { passive: true });
+  });
   function showList() {
     var list = filtered();
-    var html = '<div class="count">' + list.length + ' de ' + SONGS.length + ' canciones</div>';
+    var html = '';
+    var arts = artists();
+    if (arts.length > 1) {
+      html += '<div class="chips"><button class="chip' + (state.artist ? '' : ' on') + '" data-a="">Todos</button>';
+      arts.forEach(function (a) {
+        html += '<button class="chip' + (state.artist === a.name ? ' on' : '') + '" data-a="' + esc(a.name) + '">' +
+          esc(a.name) + ' · ' + a.n + '</button>';
+      });
+      html += '</div>';
+    }
+    html += '<div class="count">' + list.length + ' de ' + SONGS.length + ' canciones</div>';
     if (!list.length) html += '<div class="empty">No hay resultados</div>';
     list.forEach(function (s) {
       html += '<a class="item" href="#' + encodeURIComponent(s.id) + '">' +
@@ -193,13 +264,16 @@
         '<span class="k">' + esc(s.key) + '</span></a>';
     });
     app.innerHTML = html;
+    app.querySelectorAll('.chip').forEach(function (b) {
+      b.onclick = function () { setArtist(b.getAttribute('data-a')); };
+    });
   }
   function showSong(s) {
     var by = state.transpose;
     var sign = by > 0 ? '+' + by : String(by);
     app.innerHTML =
       '<button class="back" id="back">← Todas</button>' +
-      '<div class="song-head"><h2>' + esc(s.title) + '</h2><div class="a">' + esc(s.artist) + '</div></div>' +
+      '<div class="song-head"><h2>' + esc(s.title) + '</h2><div class="a"><button class="alink" id="alink" title="Ver más de este artista">' + esc(s.artist) + '</button></div></div>' +
       '<div class="tools">' +
         '<div class="grp"><span class="lbl">Tono</span>' +
           '<button data-t="-1">−</button><span class="val">' + esc(fmtKey(s.key, by) || sign) + '</span>' +
@@ -209,7 +283,20 @@
           '<button data-f="-1">A−</button><button data-f="1">A+</button></div>' +
         '<button id="again">🎲 Otro</button>' +
       '</div>' +
-      '<pre style="--fs:' + state.fs + 'px">' + renderBody(s.body, by) + '</pre>';
+      '<pre style="--fs:' + state.fs + 'px">' + renderBody(s.body, by) + '</pre>' +
+      '<div id="as"><button class="play" data-p title="Deslizamiento automático">▶</button>' +
+        '<button data-l="-1" title="Más lento">−</button><span class="lv"></span>' +
+        '<button data-l="1" title="Más rápido">+</button></div>';
+    barUpdate();
+    document.getElementById('alink').onclick = function () { setArtist(s.artist); };
+    document.getElementById('as').querySelector('[data-p]').onclick = function () { sc.on ? scStop() : scStart(); };
+    document.getElementById('as').querySelectorAll('[data-l]').forEach(function (b) {
+      b.onclick = function () {
+        sc.level = Math.min(5, Math.max(1, sc.level + parseInt(b.getAttribute('data-l'), 10)));
+        store('lvl', String(sc.level));
+        barUpdate();
+      };
+    });
     document.getElementById('back').onclick = function () { location.hash = ''; };
     document.getElementById('again').onclick = function () { randomSong(s.id); };
     app.querySelectorAll('[data-t]').forEach(function (b) {
@@ -229,6 +316,7 @@
     document.title = s.title + ' — Cancionero';
   }
   function route() {
+    scStop();
     var id = decodeURIComponent(location.hash.replace(/^#/, ''));
     var s = SONGS.filter(function (x) { return x.id === id; })[0];
     if (s) { showSong(s); window.scrollTo(0, 0); }
@@ -249,7 +337,7 @@
     if (location.hash) location.hash = ''; else showList();
   });
   document.getElementById('rand').onclick = function () { randomSong(); };
-  document.getElementById('home').onclick = function () { q.value = ''; location.hash = ''; showList(); };
+  document.getElementById('home').onclick = function () { q.value = ''; state.artist = ''; location.hash = ''; showList(); };
   document.getElementById('theme').onclick = function () {
     var el = document.documentElement;
     var dark = el.getAttribute('data-theme') === 'dark' ||
