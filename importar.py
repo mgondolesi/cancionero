@@ -8,7 +8,7 @@ Cómo se usa:
   2. Corré este script (o hacé commit en GitHub: la Action lo corre sola).
 
 Qué hace con cada archivo:
-  - Saca la basura: menús ("Cambio de Tono", "Cifrado Inglés/Latino"...), puntaje,
+  - Saca la basura: firmas del final (una raya larga y texto sin acordes), menús ("Cambio de Tono", "Cifrado Inglés/Latino"...), puntaje,
     "Enviado por", links y los ``` del código.
   - Pone el encabezado (título, artista, tono). El tono es una estimación: revisalo.
   - Pasa los acordes en notación latina (MIm, SIm, LAm, SI7, SOL) a la inglesa (Em, Bm, Am, B7, G).
@@ -153,6 +153,12 @@ def clean(raw: str) -> str:
             out.append(m.group("chords"))
             continue
         out.append(l)
+    # Firma del que subió la canción: una raya larga cerca del final y después solo texto sin acordes
+    for i in range(len(out) - 1, max(len(out) - 7, 0), -1):
+        if re.match(r"^\s*-{15,}\s*$", out[i]):
+            if not any(fc.kind(x) == "chord" for x in out[i:]):
+                out = out[:i]
+            break
     body = "\n".join(out).strip("\n")
     return re.sub(r"\n{3,}", "\n\n", body)
 
