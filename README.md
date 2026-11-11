@@ -37,3 +37,7 @@ python3 fill_chords.py songs/archivo.txt --write   # una sola canción
 ```
 
 Conviene revisar el resultado: los acordes quedan aproximadamente sobre las mismas sílabas, no exactamente.
+
+## Control de repetidas
+
+`build.py` avisa si hay canciones repetidas: mismo título y artista (ignorando tildes y mayúsculas), contenido casi igual, o mismo título con distinto artista. Es solo un aviso: no frena la publicación. En GitHub aparece como advertencia amarilla en la ejecución de "Publicar cancionero" (pestaña Actions).
