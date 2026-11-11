@@ -15,16 +15,23 @@ Qué hace con cada archivo:
     se vean resaltados y se puedan transponer.
   - Completa los acordes de las estrofas repetidas (usa fill_chords.py).
   - Si la canción ya existe (mismo título y artista), no la importa y la deja en inbox/.
+  - Si el artista es nuevo y no tiene imagen en logos/, intenta bajar la foto de su página
+    de Wikipedia (la imagen principal de la página, a 200 px). Es automático y puede
+    equivocarse: para cambiarla poné tu propio archivo en logos/ (ver README).
+    Se puede saltear con --sin-fotos.
   - Guarda en songs/ y borra el archivo de inbox/.
 
 Si el nombre del archivo no tiene " - ", busca título y artista en los dos
 primeros links que trae el texto copiado de la web: [Título](...) y [Artista](...).
 """
 import argparse
+import json
 import os
 import re
 import sys
 import unicodedata
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 import build
@@ -145,8 +152,72 @@ def existing():
     return out
 
 
+# ---------- foto de la banda (Wikipedia) ----------
+UA = "cancionero-importador/1.0"      # nombre genérico, sin datos personales
+LOGOS = ROOT / "logos"
+MUSIC = re.compile(r"banda|grupo|m[uú]sic|cantante|cantautor|rock|band|singer|musical|duo|dúo", re.I)
+
+
+def http_json(url: str):
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return json.load(r)
+
+
+def http_bytes(url: str):
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return r.read(), r.headers.get("Content-Type", "").split(";")[0].strip()
+
+
+def wiki_image(artist: str, lang: str):
+    """(título de la página, url de la imagen) del mejor resultado que parezca una banda/músico, o None."""
+    q = urllib.parse.urlencode({
+        "action": "query", "format": "json", "generator": "search", "gsrsearch": f"{artist} banda música",
+        "gsrlimit": "5", "prop": "pageimages|description", "piprop": "thumbnail", "pithumbsize": "200",
+    })
+    data = http_json(f"https://{lang}.wikipedia.org/w/api.php?{q}")
+    pages = sorted((data.get("query") or {}).get("pages", {}).values(), key=lambda p: p.get("index", 99))
+    want = build.norm(artist)
+    for p in pages:
+        title = build.norm(re.sub(r"\(.*?\)", "", p.get("title", "")))
+        if want not in title and title not in want:
+            continue
+        if not MUSIC.search(p.get("description", "") + " " + p.get("title", "")):
+            continue
+        thumb = (p.get("thumbnail") or {}).get("source")
+        return (p["title"], thumb) if thumb else None
+    return None
+
+
+def fetch_photo(artist: str):
+    """Baja la foto a logos/<artista>.<ext>. Devuelve (archivo, página) o None si no pudo."""
+    for lang in ("es", "en"):
+        try:
+            found = wiki_image(artist, lang)
+            if not found:
+                continue
+            title, url = found
+            data, ctype = http_bytes(url)
+            ext = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/svg+xml": ".svg"}.get(ctype)
+            if not ext or len(data) > 300_000:
+                continue
+            LOGOS.mkdir(exist_ok=True)
+            dest = LOGOS / (build.logo_slug(artist) + ext)
+            dest.write_bytes(data)
+            return dest, f"{lang}.wikipedia.org: {title}"
+        except Exception:
+            continue
+    return None
+
+
+def has_logo(artist: str) -> bool:
+    return any(LOGOS.glob(build.logo_slug(artist) + ".*")) if LOGOS.exists() else False
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--sin-fotos", action="store_true", help="no buscar la foto de las bandas nuevas")
     ap.add_argument("--dry-run", action="store_true", help="mostrar qué haría sin escribir ni borrar nada")
     args = ap.parse_args()
 
@@ -177,10 +248,17 @@ def main() -> None:
         print(f'{f.name} -> songs/{target.name}  ("{title}", {artist}, tono {key or "?"})')
         for n in notes:
             print(n)
+        new_artist = not any(a == build.norm(artist) for _, a, _ in have)
         if not args.dry_run:
             target.write_text(header + body + "\n", encoding="utf-8")
             f.unlink()
             have.append((build.norm(title), build.norm(artist), target.name))
+            if new_artist and not args.sin_fotos and not has_logo(artist):
+                got = fetch_photo(artist)
+                if got:
+                    print(f"  foto de {artist}: logos/{got[0].name}  (de {got[1]}; revisá que sea la banda correcta)")
+                else:
+                    print(f"  no encontré una foto de {artist}: queda la inicial (podés poner la tuya en logos/)")
 
 
 if __name__ == "__main__":

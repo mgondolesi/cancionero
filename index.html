@@ -96,6 +96,8 @@
 
   .av.logo { background: #fff; border: 1px solid var(--line); overflow: hidden; padding: calc(var(--s, 48px) * .12); }
   .av.logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .av.logo.photo { padding: 0; }
+  .av.logo.photo img { object-fit: cover; }
 
   /* ---------- inicio ---------- */
   .hero { padding: 8px 0 20px; }
@@ -348,7 +350,7 @@
   }
   function avatar(name, size) {
     var st = 'style="--h:' + hue(name) + ';--s:' + size + 'px"';
-    if (LOGOS[name]) return '<span class="av logo" ' + st + ' aria-hidden="true"><img src="' + LOGOS[name] + '" alt=""></span>';
+    if (LOGOS[name]) return '<span class="av logo' + (/^data:image\/jpeg/.test(LOGOS[name]) ? ' photo' : '') + '" ' + st + ' aria-hidden="true"><img src="' + LOGOS[name] + '" alt=""></span>';
     return '<span class="av" ' + st + ' aria-hidden="true">' + esc(initials(name)) + '</span>';
   }
   function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }

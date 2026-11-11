@@ -61,3 +61,11 @@ Si hay una imagen en `logos/` con el nombre del artista, la página la usa en lu
 - Nombre del archivo: el artista en minúsculas, sin tildes y con guiones: `los-piojos.png`, `babasonicos.png`, `ella-es-tan-cargosa.png`. Sirve `.png`, `.jpg`, `.webp` o `.svg`.
 - Tamaño: unos 200x200 px alcanza (el logo se guarda dentro del HTML; `build.py` avisa si pesa más de 200 KB).
 - Si el nombre no coincide con ningún artista, `build.py` avisa y lo ignora.
+
+### Foto automática al importar una banda nueva
+
+Cuando `importar.py` importa una canción de un artista que todavía no está en el cancionero y no tiene imagen en `logos/`, intenta bajar la imagen principal de su página de Wikipedia (primero en español, después en inglés) a 200 px y la guarda en `logos/`.
+
+- Es automático y puede equivocarse o no encontrar nada (en ese caso queda la inicial y el script lo avisa). Para cambiarla, poné tu propio archivo en `logos/` con el nombre del artista (reemplaza el que bajó solo).
+- Las imágenes `.jpg` (fotos) se muestran llenando el círculo; las `.png`/`.svg` (logos) se muestran enteras con un margen.
+- Para saltearlo: `python3 importar.py --sin-fotos`.

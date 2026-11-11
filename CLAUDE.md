@@ -37,7 +37,9 @@ por canción o uno solo, como sea más simple).
 Si el usuario manda la imagen del logo de una banda, guardala en `logos/` con el nombre del
 artista en minúsculas, sin tildes y con guiones (`los-piojos.png`), achicala a unos 200x200 px
 si pesa mucho, corré `python3 build.py`, probá en el navegador que se vea bien y subila a `main`.
-No descargues logos de la web: solo los que el usuario manda.
+Al importar una banda nueva, `importar.py` intenta bajar solo una foto de Wikipedia a `logos/`
+(si lo logra, avisalo en la respuesta y mirá que sea la banda correcta; si no, queda la inicial).
+Aparte de eso, no descargues logos de la web: solo los que el usuario manda.
 
 ## Reglas
 
