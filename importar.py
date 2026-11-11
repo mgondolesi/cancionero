@@ -39,6 +39,7 @@ MENU = [
     "cambio de tono", "cifrado ingles/latino", "formato del texto",
 ]
 LINK = re.compile(r"^\s*\[([^\]]+)\]\([^)]*\)\s*$")
+NOTE_PAREN = re.compile(r"\([^()]*[a-záéíóúñ]{3,}[^()]*\)", re.I)
 SOBRE = re.compile(r"^(?P<label>\S.*?:)\s+(?P<chords>\S.*)$")
 
 
@@ -83,6 +84,14 @@ def clean(raw: str) -> str:
     for l in lines:
         if l.strip().startswith("```") or is_menu_line(l):
             continue
+        # "Em (sin rasguido)      Am": la aclaración sube a su propia línea y los acordes quedan alineados
+        notes = NOTE_PAREN.findall(l)
+        if notes:
+            blanked = NOTE_PAREN.sub(lambda m: " " * len(m.group(0)), l).rstrip()
+            if fc.is_chord_line(blanked):
+                out.extend(n for n in notes)
+                out.append(blanked)
+                continue
         # "Intro con armónica sobre:  Em A Em A  x 2"  ->  título + línea de acordes
         m = SOBRE.match(l.strip())
         if m and len(m.group("label").split()) > 1 and fc.is_chord_line(m.group("chords")):
