@@ -11,6 +11,7 @@ Qué hace con cada archivo:
   - Saca la basura: menús ("Cambio de Tono", "Cifrado Inglés/Latino"...), puntaje,
     "Enviado por", links y los ``` del código.
   - Pone el encabezado (título, artista, tono). El tono es una estimación: revisalo.
+  - Pasa los acordes en notación latina (MIm, SIm, LAm, SI7, SOL) a la inglesa (Em, Bm, Am, B7, G).
   - Separa líneas tipo "Intro con armónica sobre: Em A Em A" para que los acordes
     se vean resaltados y se puedan transponer.
   - Completa los acordes de las estrofas repetidas (usa fill_chords.py).
@@ -74,10 +75,55 @@ def title_artist(stem: str, raw: str):
     if " - " in stem:
         artist, title = stem.split(" - ", 1)
         return pretty(title, False), pretty(artist, True)
-    links = [m.group(1) for m in (LINK.match(l) for l in raw.split("\n")[:8]) if m]
+    head = raw.replace("\r", "").split("\n")[:30]
+    links = [m.group(1) for m in (LINK.match(l) for l in head[:8]) if m]
     if len(links) >= 2:
         return pretty(links[0], False), pretty(links[1], True)
+    # copia sin links: lo primero que hay antes del menú son título, artista, compositores y disco
+    menu = next((i for i, l in enumerate(head) if is_menu_line(l)), None)
+    top = [l.strip() for l in head[:menu] if l.strip()] if menu else []
+    if len(top) >= 2:
+        return pretty(top[0], False), pretty(top[1], True)
     return None, None
+
+
+LATIN = {"DO": "C", "RE": "D", "MI": "E", "FA": "F", "SOL": "G", "LA": "A", "SI": "B"}
+LATIN_CHORD = re.compile(
+    r"^\(?(DO|RE|MI|FA|SOL|LA|SI)([#b]?)((?:maj|min|m|dim|aug|sus|add|\d)*)(?:/(DO|RE|MI|FA|SOL|LA|SI)([#b]?))?(\(\*\)|\*)?\)?,?$"
+)
+
+
+def latin_to_english(line: str) -> str:
+    """'MIm SIm  LAm' -> 'Em Bm  Am' (misma columna para cada acorde). Solo si TODA la línea es de acordes latinos."""
+    toks = line.split()
+    if toks and LABEL_RE.match(toks[0]):
+        toks = toks[1:]
+    n = 0
+    for t in toks:
+        if LATIN_CHORD.match(t):
+            n += 1
+        elif not fc.FILLER.match(t):
+            return line
+    if not n:
+        return line
+
+    def conv(m):
+        tok = m.group(0)
+        g = LATIN_CHORD.match(tok)
+        if not g:
+            return tok
+        lead = "(" if tok.startswith("(") else ""
+        root = LATIN[g.group(1)] + g.group(2) + g.group(3)
+        if g.group(4):
+            root += "/" + LATIN[g.group(4)] + g.group(5)
+        tail = (g.group(6) or "") + (")" if tok.rstrip(",").endswith(")") else "") + ("," if tok.endswith(",") else "")
+        new = lead + root + tail
+        return new.ljust(len(tok))
+
+    return re.sub(r"\S+", conv, line)
+
+
+LABEL_RE = re.compile(r"^[A-Za-zñÑ]+:$")
 
 
 def clean(raw: str) -> str:
@@ -91,6 +137,7 @@ def clean(raw: str) -> str:
     for l in lines:
         if l.strip().startswith("```") or is_menu_line(l):
             continue
+        l = latin_to_english(l).rstrip()
         # "Em (sin rasguido)      Am": la aclaración sube a su propia línea y los acordes quedan alineados
         notes = NOTE_PAREN.findall(l)
         if notes:
