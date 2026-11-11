@@ -100,7 +100,13 @@
   /* ---------- acordes ---------- */
   var SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
   var FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
-  var CHORD = /^([A-G][#b]?)((?:maj|min|m|dim|aug|sus|add)?\d*)(?:\/([A-G][#b]?))?$/;
+  var CH = '([A-G][#b]?)((?:maj|min|m|dim|aug|sus|add)?\\d*)(?:\\/([A-G][#b]?))?(\\(\\*\\)|\\*)?';
+  var CHORD = new RegExp('^' + CH + '$');
+  // token de acordes: "Am", "F#(*)", "Cm*", "G-A-D", "Bm-C#m", "Em,"
+  var CHORDTOK = new RegExp('^' + CH + '(?:-' + CH + ')*,?$');
+  var CHORDG = new RegExp(CH, 'g');
+  var LABEL = /^[A-Za-zñÑ]+:$/;
+  var FILLER = /^(-+|[xX]\d*|\(?[xX]\d*\)?|\d+\)?|\||\(|\))$/;
 
   function idx(n) {
     var i = SHARP.indexOf(n);
@@ -112,33 +118,34 @@
     var scale = n.indexOf('b') > 0 ? FLAT : SHARP;
     return scale[((i + by) % 12 + 12) % 12];
   }
-  function shiftChord(tok, by) {
-    var m = CHORD.exec(tok);
-    if (!m) return tok;
-    return shiftNote(m[1], by) + m[2] + (m[3] ? '/' + shiftNote(m[3], by) : '');
+  function shiftToken(tok, by) {
+    if (!CHORDTOK.test(tok)) return tok;
+    return tok.replace(CHORDG, function (_, root, qual, bass, star) {
+      return shiftNote(root, by) + qual + (bass ? '/' + shiftNote(bass, by) : '') + (star || '');
+    });
   }
   function isChordLine(line) {
     var toks = line.trim().split(/\s+/).filter(Boolean);
-    if (!toks.length) return false;
-    if (/^[A-Za-zñ]+:$/.test(toks[0])) toks.shift();       // "Intro:" / "Inter:"
+    if (toks.length && LABEL.test(toks[0])) toks.shift();   // "Intro:" / "Inter:"
     var n = 0;
     for (var i = 0; i < toks.length; i++) {
-      if (CHORD.test(toks[i])) n++;
-      else if (!/^(-+|\[?-+\]?|[xX]\d+|\||\(|\))$/.test(toks[i])) return false;
+      if (CHORDTOK.test(toks[i])) n++;
+      else if (!FILLER.test(toks[i])) return false;
     }
     return n > 0;
   }
   // Transpone manteniendo la alineación con la letra
   function transposeLine(line, by) {
     var parts = line.match(/\s+|\S+/g) || [];
-    var carry = 0, out = '';
+    var carry = 0, out = '', first = true;
     parts.forEach(function (p) {
       if (/^\s/.test(p)) {
         var n = Math.max(1, p.length - carry);
         carry -= p.length - n;
         out += new Array(n + 1).join(' ');
       } else {
-        var t = CHORD.test(p) ? shiftChord(p, by) : p;
+        var t = (first && LABEL.test(p)) ? p : shiftToken(p, by);
+        first = false;
         carry += t.length - p.length;
         out += t;
       }
