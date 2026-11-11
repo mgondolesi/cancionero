@@ -135,8 +135,10 @@ def fill(body):
             total = sum(g["nl"] for g in group)
             if total < 2:
                 continue
-            src = next((s for s in reversed(blks[:n])
-                        if s["ok"] and s["nc"] > 0 and s["nl"] == total and s["label"] == blk["label"]), None)
+            cands = [s for s in reversed(blks[:n]) if s["ok"] and s["nc"] > 0 and s["nl"] == total]
+            src = next((s for s in cands if s["label"] == blk["label"]), None)
+            if src is None and blk["label"] is None:     # estribillo repetido sin título: vale cualquier sección
+                src = cands[0] if cands else None
             if not src:
                 continue
             pat = pattern_of(body, src)

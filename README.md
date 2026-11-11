@@ -41,3 +41,15 @@ Conviene revisar el resultado: los acordes quedan aproximadamente sobre las mism
 ## Control de repetidas
 
 `build.py` avisa si hay canciones repetidas: mismo título y artista (ignorando tildes y mayúsculas), contenido casi igual, o mismo título con distinto artista. Es solo un aviso: no frena la publicación. En GitHub aparece como advertencia amarilla en la ejecución de "Publicar cancionero" (pestaña Actions).
+
+## Sumar canciones sin correr nada: la carpeta `inbox/`
+
+1. En GitHub: `inbox` → Add file → Create new file. Nombralo `artista - titulo.txt` (por ejemplo `los piojos - vine hasta aqui.txt`).
+2. Pegá adentro el texto tal cual lo copiaste, con todo lo que traiga.
+3. Commit a `main`.
+
+La Action corre `importar.py`: limpia el texto (menús, puntajes, "Enviado por", links), arma el encabezado con título, artista y tono (el tono es una estimación: revisalo), completa los acordes de las estrofas repetidas, avisa si la canción ya existe, la guarda en `songs/`, borra el archivo de `inbox/` y publica la página.
+
+Si el nombre no tiene " - ", intenta sacar título y artista de los dos primeros links del texto copiado. Si no puede, deja un aviso amarillo en Actions y el archivo queda en `inbox/`.
+
+Para probarlo en la compu: `python3 importar.py --dry-run` (simulación) o `python3 importar.py`.

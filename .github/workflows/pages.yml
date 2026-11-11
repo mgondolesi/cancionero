@@ -22,15 +22,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Importar canciones nuevas de inbox/
+        run: python3 importar.py
       - name: Regenerar index.html con las canciones
         run: python3 build.py
-      - name: Commitear index.html si cambió
+      - name: Commitear los cambios (canciones importadas e index.html)
         run: |
-          if ! git diff --quiet -- index.html; then
+          git add -A songs inbox index.html
+          if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add index.html
-            git commit -m "Actualizar index.html con las canciones"
+            git commit -m "Importar canciones y actualizar index.html"
             git push
           fi
       - run: |
