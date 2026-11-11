@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Genera songs.js a partir de songs/*.txt.
+"""Genera index.html (con todas las canciones adentro) a partir de template.html y songs/*.txt.
 
 Cada canción es un .txt con encabezado opcional entre '---':
 
@@ -18,7 +18,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 SONGS_DIR = ROOT / "songs"
-OUT = ROOT / "songs.js"
+TEMPLATE = ROOT / "template.html"
+OUT = ROOT / "index.html"
 
 
 def parse(path: Path) -> dict:
@@ -49,11 +50,12 @@ def main() -> None:
     files = sorted(SONGS_DIR.glob("*.txt"))
     songs = [parse(p) for p in files]
     songs.sort(key=lambda s: (s["title"].lower(), s["artist"].lower()))
-    OUT.write_text(
-        "// Generado por build.py — no editar a mano\n"
-        "window.SONGS = " + json.dumps(songs, ensure_ascii=False, indent=1) + ";\n",
-        encoding="utf-8",
-    )
+    html = TEMPLATE.read_text(encoding="utf-8")
+    marker = "/*SONGS_JSON*/[]/*END_SONGS*/"
+    if marker not in html:
+        sys.exit("template.html: falta el marcador de canciones")
+    data = json.dumps(songs, ensure_ascii=False).replace("</", "<\\/")
+    OUT.write_text(html.replace(marker, data), encoding="utf-8")
     print(f"{len(songs)} canciones -> {OUT.name}")
 
 

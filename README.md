@@ -4,7 +4,7 @@ Cancionero de guitarra: una página estática con acordes sobre la letra, buscad
 
 ## Agregar una canción
 
-1. Creá `songs/artista-titulo.txt` con este formato (los acordes quedan alineados con los espacios, no los toques):
+1. En GitHub: `songs` → Add file → Create new file → `artista-titulo.txt`, con este formato (los acordes quedan alineados con los espacios, no los toques):
 
    ```
    ---
@@ -16,16 +16,11 @@ Cancionero de guitarra: una página estática con acordes sobre la letra, buscad
    Nadie puede hablar en serio de algo así
    ```
 
-2. Subilo a `main`. GitHub Pages corre `build.py` y publica solo.
+2. Commit a `main`. Una Action regenera `index.html` (con todas las canciones adentro) y publica la página. No hay que correr nada.
 
-Para probarlo en tu compu:
+`index.html` es un único archivo autocontenido: se puede descargar y abrir offline, con todos los temas.
 
-```bash
-python3 build.py
-python3 -m http.server   # y abrí http://localhost:8000
-```
-
-(`songs.js` se genera con `build.py` y también va commiteado, así el `index.html` funciona abriéndolo directo.)
+Archivos: `template.html` es el código de la página, `index.html` se genera solo (no editar a mano). Para probar local: `python3 build.py`.
 
 ## Publicar en GitHub Pages (una sola vez)
 

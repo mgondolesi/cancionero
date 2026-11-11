@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cancionero</title>
+<style>
+  :root {
+    --bg: #fbfaf7; --fg: #1d1c1a; --muted: #77746d; --line: #e4e1d9;
+    --card: #ffffff; --accent: #b4491f; --chord: #b4491f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161513; --fg: #ece9e2; --muted: #9a968c; --line: #2d2b27;
+      --card: #1f1d1a; --accent: #f08a5d; --chord: #f4a97f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161513; --fg: #ece9e2; --muted: #9a968c; --line: #2d2b27;
+    --card: #1f1d1a; --accent: #f08a5d; --chord: #f4a97f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  header {
+    position: sticky; top: 0; z-index: 5; background: var(--bg);
+    border-bottom: 1px solid var(--line); padding: 12px 16px;
+  }
+  .bar { max-width: 760px; margin: 0 auto; display: flex; gap: 8px; align-items: center; }
+  h1 { font-size: 18px; margin: 0 8px 0 0; cursor: pointer; white-space: nowrap; }
+  input[type=search] {
+    flex: 1; min-width: 0; padding: 9px 12px; font: inherit; color: var(--fg);
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+  }
+  button {
+    font: inherit; color: var(--fg); background: var(--card); cursor: pointer;
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  main { max-width: 760px; margin: 0 auto; padding: 16px; }
+  .count { color: var(--muted); font-size: 14px; margin: 4px 0 12px; }
+  .item {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 12px 14px; margin-bottom: 8px; background: var(--card);
+    border: 1px solid var(--line); border-radius: 10px; cursor: pointer;
+    text-decoration: none; color: inherit;
+  }
+  .item:hover { border-color: var(--accent); }
+  .item .t { font-weight: 600; }
+  .item .a { color: var(--muted); font-size: 14px; }
+  .item .k { color: var(--accent); font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .empty { color: var(--muted); text-align: center; padding: 40px 0; }
+  .back { margin-bottom: 12px; }
+  .song-head h2 { margin: 0; font-size: 24px; }
+  .song-head .a { color: var(--muted); }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0; }
+  .tools .grp { display: flex; align-items: center; gap: 4px; }
+  .tools .lbl { color: var(--muted); font-size: 14px; margin-right: 2px; }
+  .tools .val { min-width: 3.2em; text-align: center; font-weight: 600; }
+  pre {
+    margin: 0; padding: 16px; overflow-x: auto; background: var(--card);
+    border: 1px solid var(--line); border-radius: 10px; font-size: var(--fs, 15px);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; line-height: 1.35;
+  }
+  pre .c { color: var(--chord); font-weight: 700; }
+  pre .s { color: var(--muted); font-weight: 600; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 0 40px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1 id="home">🎸 Cancionero</h1>
+    <input id="q" type="search" placeholder="Buscar título, artista o letra…" autocomplete="off">
+    <button id="rand" class="primary" title="Tema al azar">🎲</button>
+    <button id="theme" title="Cambiar tema">◐</button>
+  </div>
+</header>
+<main id="app"></main>
+<footer id="foot"></footer>
+
+<script>
+(function () {
+  var SONGS = /*SONGS_JSON*/[]/*END_SONGS*/;
+  var app = document.getElementById('app');
+  var q = document.getElementById('q');
+  var state = { transpose: 0, fs: 15 };
+
+  function store(k, v) {
+    try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {}
+    return null;
+  }
+  state.fs = parseInt(store('fs'), 10) || 15;
+  var savedTheme = store('theme');
+  if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+  /* ---------- acordes ---------- */
+  var SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  var FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+  var CHORD = /^([A-G][#b]?)((?:maj|min|m|dim|aug|sus|add)?\d*)(?:\/([A-G][#b]?))?$/;
+
+  function idx(n) {
+    var i = SHARP.indexOf(n);
+    return i >= 0 ? i : FLAT.indexOf(n);
+  }
+  function shiftNote(n, by) {
+    var i = idx(n);
+    if (i < 0) return n;
+    var scale = n.indexOf('b') > 0 ? FLAT : SHARP;
+    return scale[((i + by) % 12 + 12) % 12];
+  }
+  function shiftChord(tok, by) {
+    var m = CHORD.exec(tok);
+    if (!m) return tok;
+    return shiftNote(m[1], by) + m[2] + (m[3] ? '/' + shiftNote(m[3], by) : '');
+  }
+  function isChordLine(line) {
+    var toks = line.trim().split(/\s+/).filter(Boolean);
+    if (!toks.length) return false;
+    if (/^[A-Za-zñ]+:$/.test(toks[0])) toks.shift();       // "Intro:" / "Inter:"
+    var n = 0;
+    for (var i = 0; i < toks.length; i++) {
+      if (CHORD.test(toks[i])) n++;
+      else if (!/^(-+|\[?-+\]?|[xX]\d+|\||\(|\))$/.test(toks[i])) return false;
+    }
+    return n > 0;
+  }
+  // Transpone manteniendo la alineación con la letra
+  function transposeLine(line, by) {
+    var parts = line.match(/\s+|\S+/g) || [];
+    var carry = 0, out = '';
+    parts.forEach(function (p) {
+      if (/^\s/.test(p)) {
+        var n = Math.max(1, p.length - carry);
+        carry -= p.length - n;
+        out += new Array(n + 1).join(' ');
+      } else {
+        var t = CHORD.test(p) ? shiftChord(p, by) : p;
+        carry += t.length - p.length;
+        out += t;
+      }
+    });
+    return out;
+  }
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function renderBody(body, by) {
+    return body.split('\n').map(function (line) {
+      if (isChordLine(line)) {
+        return '<span class="c">' + esc(by ? transposeLine(line, by) : line) + '</span>';
+      }
+      if (/^\s*(ESTRIBILLO|VERSO|PUENTE|INTRO|SOLO|CORO)\b/.test(line)) {
+        return '<span class="s">' + esc(line) + '</span>';
+      }
+      return esc(line);
+    }).join('\n');
+  }
+  function fmtKey(k, by) {
+    if (!k) return '';
+    var m = /^([A-G][#b]?)(.*)$/.exec(k);
+    return m ? shiftNote(m[1], by) + m[2] : k;
+  }
+  function norm(s) {
+    return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+
+  /* ---------- vistas ---------- */
+  function filtered() {
+    var t = norm(q.value.trim());
+    if (!t) return SONGS;
+    return SONGS.filter(function (s) {
+      return norm(s.title + ' ' + s.artist + ' ' + s.body).indexOf(t) >= 0;
+    });
+  }
+  function showList() {
+    var list = filtered();
+    var html = '<div class="count">' + list.length + ' de ' + SONGS.length + ' canciones</div>';
+    if (!list.length) html += '<div class="empty">No hay resultados</div>';
+    list.forEach(function (s) {
+      html += '<a class="item" href="#' + encodeURIComponent(s.id) + '">' +
+        '<span><span class="t">' + esc(s.title) + '</span><br><span class="a">' + esc(s.artist) + '</span></span>' +
+        '<span class="k">' + esc(s.key) + '</span></a>';
+    });
+    app.innerHTML = html;
+  }
+  function showSong(s) {
+    var by = state.transpose;
+    var sign = by > 0 ? '+' + by : String(by);
+    app.innerHTML =
+      '<button class="back" id="back">← Todas</button>' +
+      '<div class="song-head"><h2>' + esc(s.title) + '</h2><div class="a">' + esc(s.artist) + '</div></div>' +
+      '<div class="tools">' +
+        '<div class="grp"><span class="lbl">Tono</span>' +
+          '<button data-t="-1">−</button><span class="val">' + esc(fmtKey(s.key, by) || sign) + '</span>' +
+          '<button data-t="1">+</button>' +
+          (by ? '<button data-t="0" title="Restablecer">↺</button>' : '') + '</div>' +
+        '<div class="grp"><span class="lbl">Letra</span>' +
+          '<button data-f="-1">A−</button><button data-f="1">A+</button></div>' +
+        '<button id="again">🎲 Otro</button>' +
+      '</div>' +
+      '<pre style="--fs:' + state.fs + 'px">' + renderBody(s.body, by) + '</pre>';
+    document.getElementById('back').onclick = function () { location.hash = ''; };
+    document.getElementById('again').onclick = function () { randomSong(s.id); };
+    app.querySelectorAll('[data-t]').forEach(function (b) {
+      b.onclick = function () {
+        var v = parseInt(b.getAttribute('data-t'), 10);
+        state.transpose = v === 0 ? 0 : state.transpose + v;
+        showSong(s);
+      };
+    });
+    app.querySelectorAll('[data-f]').forEach(function (b) {
+      b.onclick = function () {
+        state.fs = Math.min(28, Math.max(10, state.fs + parseInt(b.getAttribute('data-f'), 10)));
+        store('fs', String(state.fs));
+        showSong(s);
+      };
+    });
+    document.title = s.title + ' — Cancionero';
+  }
+  function route() {
+    var id = decodeURIComponent(location.hash.replace(/^#/, ''));
+    var s = SONGS.filter(function (x) { return x.id === id; })[0];
+    if (s) { showSong(s); window.scrollTo(0, 0); }
+    else { document.title = 'Cancionero'; showList(); }
+  }
+  function randomSong(exceptId) {
+    var pool = filtered();
+    if (pool.length > 1 && exceptId) pool = pool.filter(function (s) { return s.id !== exceptId; });
+    if (!pool.length) return;
+    var s = pool[Math.floor(Math.random() * pool.length)];
+    state.transpose = 0;
+    if (location.hash === '#' + encodeURIComponent(s.id)) route();
+    else location.hash = encodeURIComponent(s.id);
+  }
+
+  window.addEventListener('hashchange', function () { state.transpose = 0; route(); });
+  q.addEventListener('input', function () {
+    if (location.hash) location.hash = ''; else showList();
+  });
+  document.getElementById('rand').onclick = function () { randomSong(); };
+  document.getElementById('home').onclick = function () { q.value = ''; location.hash = ''; showList(); };
+  document.getElementById('theme').onclick = function () {
+    var el = document.documentElement;
+    var dark = el.getAttribute('data-theme') === 'dark' ||
+      (!el.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = dark ? 'light' : 'dark';
+    el.setAttribute('data-theme', next);
+    store('theme', next);
+  };
+  document.getElementById('foot').textContent = SONGS.length + ' canciones';
+  route();
+})();
+</script>
+</body>
+</html>
