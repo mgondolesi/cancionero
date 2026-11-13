@@ -59,13 +59,13 @@ prepotente y altiva.
 
 REPITE INTRO (X6)
 
-Am
+Am                         F  C
 Por las noches la soledad desespera,
-F/A
+Am                         F  C
 por las noches la soledad desespera.
-C
+Am                             F  C
 Que por las noches la soledad desespera,
-E
+Am                         F  C
 por las noches la soledad desespera.
 Am
 Espera por ti,
@@ -104,13 +104,13 @@ C               E
 suplicando ternura.
 
 REPITE INTRO (X4)
-Am
+Am                         F  C
 Por las noches la soledad desespera,
-F/A
+Am                         F  C
 por las noches la soledad desespera.
-C
+Am                             F  C
 Que por las noches la soledad desespera,
-E
+Am                         F  C
 por las noches la soledad desespera.
 
 VUELVE A ARPEGIAR AL MISMO ESTILO DE ANTES PERO CON OTROS ACORDES
@@ -140,25 +140,30 @@ tambien por aquel ...
 
 REPITE LA INTRO HASTA EL FINAL
 
-Am
+Am                      F  C
 ¿Y que hace este angelito, ahora,
+Am             F  C
 a las seis de la mañana,
-F/A
+Am     F  C
 subida al mastil
+Am       F  C
 de este naufragio?
-C
+Am                             F  C
 ¿A ver si, alzando las copas, foragidas,
+Am                 F  C
 viene un cielo de enfermeras
-E
+Am         F  C
 para lamerm sin asco
+Am   F  C
 las heridas...
+Am   F  C
 de amor?
 
-Am
+Am                           F  C
 Por las noches la soledad desespera...
-F/A
+Am              F  C
 ¿A ver si viene del cielo
-C
+Am            F  C
 una enfermera del amor?
-E
+Am                           F  C
 Por las noches la soledad desespera...
