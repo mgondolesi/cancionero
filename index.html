@@ -69,6 +69,19 @@
   }
   .icon-btn:hover { border-color: var(--accent); }
 
+  .top-search { max-width: 880px; margin: 0 auto; padding: 0 12px 10px 16px; }
+  .top-search .search { flex: none; width: 100%; }
+  .top-search .search input { height: 40px; box-shadow: none; }
+  .sres {
+    position: absolute; left: 0; right: 0; top: 100%;
+    max-height: calc(100vh - 130px); max-height: calc(100dvh - 130px); overflow-y: auto;
+    background: var(--bg); border-bottom: 1px solid var(--line); box-shadow: 0 18px 30px rgba(0,0,0,.18);
+  }
+  .sres[hidden] { display: none; }
+  .sres-in { max-width: 880px; margin: 0 auto; padding: 4px 16px 24px; }
+  .sres .sec-title:first-child { margin-top: 14px; }
+  .sres .empty { padding: 28px 0; }
+
   main { max-width: 880px; margin: 0 auto; padding: 20px 16px 48px; }
   .enter { animation: enter .22s ease-out; }
   @keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -113,6 +126,7 @@
     box-shadow: var(--shadow); -webkit-appearance: none; appearance: none;
   }
   .search input::placeholder { color: var(--muted); }
+  .search input::-webkit-search-cancel-button, .search input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
   .search input:focus { outline: none; border-color: var(--accent); }
   .search .clear {
     position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
@@ -256,6 +270,11 @@
     <button class="back" id="back" hidden><span class="arrow" aria-hidden="true">‹</span><span class="lbl" id="back-lbl"></span></button>
     <button class="icon-btn" id="theme" title="Cambiar tema (claro / oscuro)" aria-label="Cambiar tema"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button>
   </div>
+  <div class="top-search"><label class="search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="Buscar artista, canción o letra…" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button class="clear" id="qclear" aria-label="Borrar búsqueda" hidden>×</button></label></div>
+  <div class="sres" id="sres" hidden><div class="sres-in" id="sres-in"></div></div>
 </header>
 <main id="app"></main>
 <footer id="foot"></footer>
@@ -594,24 +613,15 @@
     app.innerHTML =
       '<section class="hero"><h1>Tu <em>cancionero</em></h1>' +
       '<p>' + plural(SONGS.length, 'canción', 'canciones') + ' de ' + plural(ARTISTS.length, 'artista', 'artistas') + '. Elegí uno para ver sus temas.</p>' +
-      '<div class="search-row"><label class="search">' +
-        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
-        '<input id="q" type="search" placeholder="Buscar artista, canción o letra…" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(state.q) + '">' +
-        '<button class="clear" id="qclear" aria-label="Borrar búsqueda" hidden>×</button></label>' +
-      '<button class="btn primary" id="rand">🎲 Tema al azar</button></div></section>' +
+      '<div class="search-row"><button class="btn primary" id="rand">🎲 Tema al azar</button></div></section>' +
       '<div id="res"></div>';
-    var q = document.getElementById('q');
-    q.oninput = function () { state.q = q.value; homeResults(); };
-    document.getElementById('qclear').onclick = function () { q.value = ''; state.q = ''; homeResults(); q.focus(); };
     document.getElementById('rand').onclick = function () { randomSong(); };
     homeResults();
   }
   function homeResults() {
     var res = document.getElementById('res');
-    var t = norm(state.q.trim());
-    document.getElementById('qclear').hidden = !state.q;
     var html = '';
-    if (!t) {
+    {
       html += '<div class="sec-title">Artistas <span class="n">' + ARTISTS.length + '</span></div>';
       var group = ARTISTS.length > 24, last = '';
       if (!group) html += '<div class="grid">' + ARTISTS.map(artistCard).join('') + '</div>';
@@ -628,7 +638,19 @@
         });
         html += '</div>';
       }
-    } else {
+    }
+    res.innerHTML = html;
+    bindNav(res);
+  }
+
+  /* ---------- buscador (arriba, en todas las pantallas) ---------- */
+  function runSearch() {
+    var box = document.getElementById('sres'), inner = document.getElementById('sres-in');
+    var t = norm(state.q.trim());
+    document.getElementById('qclear').hidden = !state.q;
+    if (!t) { box.hidden = true; inner.innerHTML = ''; return; }
+    var html = '';
+    {
       var as = ARTISTS.filter(function (a) { return norm(a.name).indexOf(t) >= 0; });
       var byMeta = [], byBody = [];
       SONGS.forEach(function (s) {
@@ -645,8 +667,16 @@
         html = '<div class="empty"><b>No encontré nada</b>Probá con otro nombre o parte de la letra.</div>';
       }
     }
-    res.innerHTML = html;
-    bindNav(res);
+    inner.innerHTML = html;
+    bindNav(inner);
+    box.hidden = false;
+    box.scrollTop = 0;
+  }
+  function clearSearch() {
+    state.q = '';
+    var q = document.getElementById('q');
+    if (q) q.value = '';
+    runSearch();
   }
 
   function viewArtist() {
@@ -736,6 +766,7 @@
   }
   function render() {
     scStop();
+    clearSearch();
     document.title = 'Cancionero';
     if (state.view === 'song') viewSong(false);
     else if (state.view === 'artist') viewArtist();
@@ -810,7 +841,18 @@
   document.getElementById('cd-x').onclick = closeChord;
   document.getElementById('cd-bg').onclick = closeChord;
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeChord(); });
-  document.getElementById('brand').onclick = function () { state.q = ''; goHome(); };
+  (function () {
+    var q = document.getElementById('q');
+    q.oninput = function () { state.q = q.value; runSearch(); };
+    q.onkeydown = function (e) {
+      if (e.key === 'Enter') {
+        var first = document.querySelector('#sres-in [data-song], #sres-in [data-artist]');
+        if (first) { first.click(); q.blur(); }
+      } else if (e.key === 'Escape') { clearSearch(); q.blur(); }
+    };
+    document.getElementById('qclear').onclick = function () { clearSearch(); q.focus(); };
+  })();
+  document.getElementById('brand').onclick = function () { goHome(); };
   document.getElementById('back').onclick = function () {
     if (state.view === 'song') goArtist(state.artist); else goHome();
   };
