@@ -1,0 +1,158 @@
+---
+title: Duda
+artist: Las Pastillas del Abuelo
+key: A
+---
+Riff
+e ------------
+b ---3/4/3-0--
+g ------------
+
+Riff A9 A9* Riff E E* x2
+
+A9                     A9*
+Nose si el tiempo es propio
+E      E*
+de nuestra conciencia
+A9        A9*         E    E*
+nose si existe de verdad
+A9                A9*
+nose quien pueda comprobar
+C#m               B9
+si todo es una foto
+A9                 F#m
+o va al ritmo de un tic tac
+C#m                 B9
+o va al ritmo de un tic tac
+
+Riff A9 A9* Riff E E*
+
+A9     A9*           E   E*
+pero que diferencia hay
+A9           A9*
+si de la conciencia
+E                E*
+no nos podemos librar
+A9        A9*
+esa guia inata y leal
+C#m       B9
+que vos bien sabes
+A9                F#m
+no siempre podemos respetar
+B9
+no siempre podemos
+
+E
+y hoy debe ser la tuya
+B9
+mi peor enemiga
+F#m                   A
+la que te hecha la culpa
+E         B9                   F#m
+por no saber aguantar tus ganas y las mias
+A
+de parpadear una vez mas
+E
+vos no te preocupes
+B9
+que yo voy a intentar
+F#m
+que pegue media vuelta
+A
+y patee para alla
+E         B9
+se que no es irreversible este proceso
+F#m                 A
+pero no quiero que vaya hacia atras
+
+Riff A9 A9* Riff E E* x2
+
+A9            A9*
+yo por ateo irracional
+E                   E*
+no tengo a quien rogarle
+A9            A9*
+vos tan insegura
+E     E*
+que queres cambiar de vida
+A9            A9*
+yo de la esperanza
+C#m      B9
+un mal amigo
+A9                     F#m
+y vos tan fragil como aquella hojita que
+B9
+me pediste que guarde
+
+E
+y hoy debe ser la tuya
+B9
+mi peor enemiga
+F#m                   A
+la que te hecha la culpa
+E         B9                   F#m
+por no saber aguantar tus ganas y las mias
+A
+de parpadear una vez mas
+E
+vos no te preocupes
+B9
+que yo voy a intentar
+F#m
+que pegue media vuelta
+A
+y patee para alla
+E         B9
+se que no es irreversible este proceso
+F#m                 A
+pero no quiero que vaya hacia atras
+E
+y hoy debe ser la tuya
+B9
+mi peor enemiga
+F#m                   A
+la que te hecha la culpa
+E         B9                   F#m
+por no saber aguantar tus ganas y las mias
+A
+de parpadear una vez mas
+E
+vos no te preocupes
+B9
+que yo voy a intentar
+F#m
+que pegue media vuelta
+A
+y patee para alla
+E         B9
+se que no es irreversible este proceso
+F#m                 A
+pero no quiero que vaya hacia atras
+
+C#m B9 F#m A x4
+
+C#m                     B9
+y si es que el tiempo existe
+F#m              A
+yo quiero compartirlo
+C#m            B9
+si todo es una foto
+F#m  A
+yo quiero estar
+C#m  B9
+al lado tuyo
+F#m  A
+al lado tuyo quiero estar
+C#m   B9
+en la foto quiero estar
+F#m  A
+al lado tuyo...
+
+A9  X 0 2 2 0 0
+A9* X 0 4 4 0 0
+E   0 2 2 1 0 0
+E*  0 2 2 1 0 2
+C#m X 4 6 6 5 4
+B9  X 2 4 4 2 2
+F#m 2 4 4 2 2 2
+A   X 0 2 2 2 0
