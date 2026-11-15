@@ -1,0 +1,31 @@
+<!-- @dsCard height=288 -->
+<!--
+blocks: accent 200x240 slab + ink 120x112 + chord 96x112 + surface-2 232x112 (merged two-wide), all on the 8px/16px steps, rx radius-lg 18.
+arrangement: a tall slab with three satellites, staggered right of x=480, 24px gutters.
+pattern: six guitar-string hairlines cut out of the blocks in the ground colour with three fret dots as discs; chosen because the system is a chord book: serif, hairline borders, warm paper.
+steps and radii: space-24, space-16, radius-lg, radius-round.
+-->
+<style>
+body{margin:0;padding:0}
+svg{display:block;width:960px;height:288px}
+.ground{fill:var(--bg)} .a{fill:var(--accent);rx:var(--radius-lg)} .i{fill:var(--ink);rx:var(--radius-lg)}
+.c{fill:var(--chord);rx:var(--radius-lg)} .t{fill:var(--surface-2);rx:var(--radius-lg)}
+.str{stroke:var(--bg);stroke-width:1.5} .dot{fill:var(--bg)}
+.nm{font:700 80px/1 var(--font-serif);fill:var(--ink);letter-spacing:-.3px}
+.tg{font:400 14px var(--font-sans);fill:var(--muted)}
+</style>
+<svg viewBox="0 0 960 288" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cancionero">
+<rect class="ground" width="960" height="288"/>
+<rect class="a" x="480" y="24" width="200" height="240"/>
+<rect class="i" x="696" y="24" width="120" height="112"/>
+<rect class="c" x="832" y="24" width="96" height="112"/>
+<rect class="t" x="696" y="152" width="232" height="112"/>
+<g>
+<line class="str" x1="480" x2="928" y1="52" y2="52"/><line class="str" x1="480" x2="928" y1="92" y2="92"/>
+<line class="str" x1="480" x2="928" y1="132" y2="132"/><line class="str" x1="480" x2="928" y1="172" y2="172"/>
+<line class="str" x1="480" x2="928" y1="212" y2="212"/><line class="str" x1="480" x2="928" y1="252" y2="252"/>
+</g>
+<circle class="dot" cx="560" cy="92" r="14"/><circle class="dot" cx="600" cy="132" r="14"/><circle class="dot" cx="640" cy="172" r="14"/>
+<text class="nm" x="40" y="206">Cancionero</text>
+<text class="tg" x="40" y="244">Acordes sobre la letra, para guitarra.</text>
+</svg>

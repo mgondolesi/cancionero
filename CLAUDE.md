@@ -60,3 +60,4 @@ Aparte de eso, no descargues logos de la web: solo los que el usuario manda.
 - `fill_chords.py` — copia acordes a estrofas repetidas sin acordes (`--write` para aplicar).
 - `build.py` — arma `index.html`; avisa de canciones repetidas.
 - `.github/workflows/pages.yml` — importa `inbox/`, arma el HTML y publica en Pages.
+- `design-system/` — sistema de diseño extraído de `template.html` (`tokens.json`, `README.md`, `components/`). Al cambiar colores, tipografías o componentes en `template.html`, respetalo y actualizalo. No entra en `index.html`.
