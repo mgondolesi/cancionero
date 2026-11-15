@@ -1,5 +1,5 @@
-Deslizador flotante para que la canción avance sola: píldora `surface` con borde `line` y `shadow-float`, centrada y fija abajo (14px más el margen seguro del teléfono), sobre el contenido (z-index 12).
+Control flotante del scroll automático. En reposo es solo un botón circular de 52px (`accent` con `accent-ink`) abajo a la derecha, para que no tape la letra. Al tocarlo la canción empieza a avanzar y el control se abre (`open`): aparecen − y +, los puntos de nivel y el botón de pausa.
 
-- Botón de reproducir circular de 48px, `accent` con `accent-ink`. A los lados, `step` para bajar o subir la velocidad.
-- El nivel se muestra con puntos de 7px: encendidos en `accent`, apagados en `line`, con la leyenda "Velocidad N" en 12px `muted`.
-- Al llegar al final se detiene y vuelve a ▶.
+- Abierto es una píldora `surface` al 92% con desenfoque, borde `line` y `shadow-float`, fija a 16px del borde (más el margen seguro del teléfono), z-index 12.
+- Nivel con 5 puntos de 7px: encendidos `accent`, apagados `line`, y "Nivel N" en 12px `muted`. Cambiar el nivel solo se puede con el scroll en marcha.
+- Se pausa solo al llegar al final o si la persona desliza con el dedo o la rueda; vuelve a ser un solo botón.

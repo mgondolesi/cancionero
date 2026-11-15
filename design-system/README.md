@@ -11,9 +11,9 @@ Cancionero es un cancionero de guitarra para leer en el teléfono: la letra en u
 ## Fundamentos visuales
 
 - **Color.** Página `bg`, objetos sobre `surface`, bordes de 1px en `line`, texto en `ink`, texto secundario en `muted`. El acento `accent` (terracota) marca lo que se toca: botón primario, enlaces, foco y valores que cambian. Los acordes van siempre en `chord`. Hay dos temas (claro y oscuro) que cambian solos con el sistema; todo color sale de un token, nunca de un literal.
-- **Tipografía.** Serif para marca, títulos y nombres (`t-display`, `t-title`, `t-row-title`); sans del sistema para interfaz (`t-body`, `t-meta`, `t-section-label`); monoespaciada (Inconsolata, incrustada desde `fonts/`) solo para la hoja de acordes (`t-chord-sheet`). Serif y sans usan las fuentes del sistema.
+- **Tipografía.** Serif para marca, títulos y nombres (`t-display`, `t-title`, `t-row-title`); sans del sistema para interfaz (`t-body`, `t-meta`, `t-section-label`); la letra de las canciones va en la sans; Inconsolata (incrustada desde `fonts/`) solo para los acordes (`t-chord-sheet`). Serif y sans usan las fuentes del sistema.
 - **Forma.** Píldoras (`radius-pill`) para botones y búsqueda, círculos para avatares y botones de 40px, `radius-lg` para tarjetas y hoja, `radius-md` para filas. Cada objeto tiene borde `line` de 1px; la sombra `shadow-card` es suave y se reserva para tarjetas, búsqueda y hoja.
-- **Espaciado.** Margen lateral de 16px, contenido de 880px como máximo y centrado, 12px entre tarjetas, 8px entre filas, 24px entre secciones. Respetá los espacios de la hoja de acordes: la alineación depende de ellos.
+- **Espaciado.** Margen lateral de 16px, contenido de 880px como máximo y centrado, 12px entre tarjetas, 8px entre filas, 24px entre secciones. En las canciones, los acordes quedan alineados con la letra por columnas en el `.txt`; la página los coloca sobre cada sílaba.
 - **Movimiento.** Corto y funcional: entrada de 0.22s (sube 8px y aparece), hover que levanta 2px, apretar que achica a 0.98, pulso del micrófono. Todo se apaga con `prefers-reduced-motion`.
 - **Estados.** Hover: borde en `accent`. Foco: contorno sólido de 2px en `accent` con 2px de separación. Escuchando: fondo `rec`.
 - **Imágenes.** Sin ilustraciones. Un avatar con la inicial coloreada por el nombre; los logos son solo los que manda el usuario.
@@ -30,4 +30,4 @@ No hay librería de íconos. Los íconos son SVG de trazo de 2px (`currentColor`
 - La hoja se arma con `ChordSheet` y su barra con `Transposer`; el scroll automático con `AutoScroll`; los diagramas con `ChordDiagram`.
 - El texto secundario (`muted`) a 13px o más y sobre `surface`: sobre `bg` claro da 4.2:1 y sobre `surface-2` 3.9:1, valores del original que se dejaron como están.
 - `accent` sobre `bg` claro da 4.2:1: usalo en 13px o más en negrita, o sobre `surface` (4.6:1).
-- La hoja de acordes no parte las líneas: se desplaza en horizontal.
+- La letra se parte en renglones; solo la tablatura se desplaza en horizontal.

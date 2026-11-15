@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13110e" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cancionero">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <title>Cancionero</title>
 <style>
   /*FONTS_CSS*/
@@ -928,7 +937,8 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeChord(); });
   (function () {
     var q = document.getElementById('q');
-    q.oninput = function () { state.q = q.value; runSearch(); };
+    var qTimer = 0;
+    q.oninput = function () { state.q = q.value; clearTimeout(qTimer); qTimer = setTimeout(runSearch, 120); };
     q.onkeydown = function (e) {
       if (e.key === 'Enter') {
         var first = document.querySelector('#sres-in [data-song], #sres-in [data-artist]');
@@ -980,6 +990,10 @@
   };
   document.getElementById('foot').textContent = plural(SONGS.length, 'canción', 'canciones') + ' · ' + plural(ARTISTS.length, 'artista', 'artistas');
 
+  // Instalable / uso sin conexión (solo cuando se abre desde la web, no desde un archivo)
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  }
   var p0 = parseHash();
   state.view = p0.view; state.artist = p0.artist; state.song = p0.song;
   render();
