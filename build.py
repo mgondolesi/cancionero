@@ -26,6 +26,7 @@ SONGS_DIR = ROOT / "songs"
 TEMPLATE = ROOT / "template.html"
 OUT = ROOT / "index.html"
 LOGOS_DIR = ROOT / "logos"
+FONTS_DIR = ROOT / "fonts"
 MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
         ".webp": "image/webp", ".svg": "image/svg+xml", ".gif": "image/gif"}
 
@@ -116,6 +117,20 @@ def load_logos(songs: list) -> dict:
     return out
 
 
+def fonts_css() -> str:
+    """@font-face de Inconsolata con los archivos de fonts/ incrustados (queda todo en un solo HTML)."""
+    css = []
+    for weight in (400, 700):
+        f = FONTS_DIR / f"inconsolata-{weight}.woff2"
+        if not f.exists():
+            warn(f"Falta fonts/{f.name}: se usa la fuente monoespaciada del sistema.")
+            continue
+        b64 = base64.b64encode(f.read_bytes()).decode()
+        css.append("@font-face{font-family:'Inconsolata';font-weight:%d;font-style:normal;font-display:swap;"
+                   "src:url(data:font/woff2;base64,%s) format('woff2')}" % (weight, b64))
+    return "\n  ".join(css)
+
+
 def main() -> None:
     files = sorted(SONGS_DIR.glob("*.txt"))
     songs = [parse(p) for p in files]
@@ -132,6 +147,10 @@ def main() -> None:
         sys.exit("template.html: falta el marcador de logos")
     logos = load_logos(songs)
     html = html.replace(lmark, json.dumps(logos, ensure_ascii=False))
+    fmark = "/*FONTS_CSS*/"
+    if fmark not in html:
+        sys.exit("template.html: falta el marcador de fuentes")
+    html = html.replace(fmark, fonts_css())
     OUT.write_text(html, encoding="utf-8")
     print(f"{len(songs)} canciones, {len(logos)} logos -> {OUT.name}")
 

@@ -6,6 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Cancionero</title>
 <style>
+  /*FONTS_CSS*/
   :root {
     --bg: #f6f1e7; --surface: #fffdf8; --surface-2: #f0e9da;
     --ink: #231f1a; --muted: #7a7266; --line: #e4dccb;
@@ -14,7 +15,7 @@
     --shadow: 0 1px 2px rgba(60,40,10,.06), 0 6px 20px rgba(60,40,10,.07);
     --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
     --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --mono: "Inconsolata", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -210,11 +211,12 @@
     background: var(--bg); font-size: 18px; line-height: 1;
   }
   .step:hover { border-color: var(--accent); }
+  .step.on { border-color: var(--accent); color: var(--accent); }
   .tools .more { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
   pre {
     margin: 0 0 110px; padding: 18px 16px; overflow-x: auto; background: var(--surface);
     border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow);
-    font: var(--fs, 15px)/1.4 var(--mono); tab-size: 4;
+    font: var(--fs, 17px)/1.4 var(--mono); tab-size: 4;
   }
   pre .c { color: var(--chord); font-weight: 700; }
   pre .s { color: var(--muted); font-weight: 700; }
@@ -306,13 +308,14 @@
   var SONGS = /*SONGS_JSON*/[]/*END_SONGS*/;
   var LOGOS = /*LOGOS_JSON*/{}/*END_LOGOS*/;   // logos de las bandas (opcional)
   var app = document.getElementById('app');
-  var state = { view: 'home', artist: '', song: '', transpose: 0, fs: 15, q: '' };
+  var state = { view: 'home', artist: '', song: '', transpose: 0, fs: 17, fit: true, q: '' };
 
   function store(k, v) {
     try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {}
     return null;
   }
-  state.fs = parseInt(store('fs'), 10) || 15;
+  state.fs = parseInt(store('fs'), 10) || 17;
+  state.fit = store('fit') !== '0';
   var savedTheme = store('theme');
   if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
 
@@ -719,7 +722,8 @@
           (by ? '<button class="step" data-t="0" title="Volver al tono original" aria-label="Restablecer tono">↺</button>' : '') + '</div>' +
         '<div class="grp"><span class="lbl">Letra</span>' +
           '<button class="step" data-f="-1" aria-label="Letra más chica">A−</button>' +
-          '<button class="step" data-f="1" aria-label="Letra más grande">A+</button></div>' +
+          '<button class="step" data-f="1" aria-label="Letra más grande">A+</button>' +
+          '<button class="step' + (state.fit ? ' on' : '') + '" data-fit title="Ajustar al ancho de la pantalla" aria-label="Ajustar la letra al ancho" aria-pressed="' + state.fit + '">↔</button></div>' +
         '<div class="more">' + (sibs ? '<button class="btn sm" id="again-a">Otra de ' + esc(a) + '</button>' : '') +
           '<button class="btn sm" id="again">🎲 Al azar</button></div>' +
       '</div>' +
@@ -729,11 +733,34 @@
         '<div class="lv"><div class="dots"><i></i><i></i><i></i><i></i><i></i></div><small></small></div>' +
         '<button class="step" data-l="1" aria-label="Más rápido">+</button></div>';
   }
+  // Tamaño de letra para que la línea más larga entre en el ancho disponible (sin scroll horizontal).
+  function fitSize(s) {
+    var pre = document.querySelector('pre');
+    var maxLen = 0;
+    s.body.split('\n').forEach(function (l) { if (l.length > maxLen) maxLen = l.length; });
+    var cs = getComputedStyle(pre);
+    var avail = pre.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var m = document.createElement('span');
+    m.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font:100px ' + cs.fontFamily;
+    m.textContent = new Array(21).join('0');
+    document.body.appendChild(m);
+    var cw = m.getBoundingClientRect().width / 20 / 100;
+    document.body.removeChild(m);
+    var fit = Math.floor(avail / ((maxLen + 1) * cw) * 2) / 2;
+    return fit < 12 ? 15 : Math.min(22, fit);   // si no entra con letra legible, tamaño cómodo y scroll horizontal
+  }
+  function applyFit(s) {
+    var pre = document.querySelector('pre');
+    if (!pre) return;
+    state.fitSize = fitSize(s);
+    pre.style.setProperty('--fs', state.fitSize + 'px');
+  }
   function viewSong(keepScroll) {
     var s = findSong(state.song);
     if (!s) return goHome();
     var y = window.scrollY;
     app.innerHTML = songHtml(s);
+    if (state.fit) applyFit(s);
     if (keepScroll) window.scrollTo(0, y);
     barUpdate();
     document.title = s.title + ' — Cancionero';
@@ -759,10 +786,19 @@
     });
     app.querySelectorAll('[data-f]').forEach(function (b) {
       b.onclick = function () {
+        if (state.fit) { state.fs = Math.round(state.fitSize || state.fs); state.fit = false; store('fit', '0'); }
         state.fs = Math.min(28, Math.max(10, state.fs + parseInt(b.getAttribute('data-f'), 10)));
         store('fs', String(state.fs));
         viewSong(true);
       };
+    });
+    var fb = app.querySelector('[data-fit]');
+    if (fb) fb.onclick = function () {
+      state.fit = !state.fit; store('fit', state.fit ? '1' : '0');
+      viewSong(true);
+    };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+      if (state.view === 'song' && state.fit) applyFit(s);
     });
   }
 
