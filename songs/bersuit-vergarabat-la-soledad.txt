@@ -21,19 +21,19 @@ Y DESPUES REPITE UNA VEZ...
 5|---0-3----------------------|
 6|----------------------------|
 
-          Am
+              Am
 Esperaría que no te asuste
-     Em
+              Em
 este instante de sinceridad;
-   G              E
+           G         E
 mi corazón vomita su verdad.
-   Am
+       Am
 Es que hay una guerra entre dos
-    Em
+           Em
 por ocupar el mismo lugar;
    G
 la urgencia
-  E
+     E
 o la soledad.
 
 AHORA MIENTRAS QUE CANTA ARPEGIA ESTOS ACORDES DE ESTA MANERA
@@ -44,17 +44,17 @@ Am               F/A               C                 E
 4|----2------|    4|----3------|    4|----2------|    4|----2------|
 5|---0-------|    5|---0-------|    5|---3-------|    5|-----------|
 6|-----------|    6|-----------|    6|-----------|    6|---0-------|
-   Am
+           Am
 La soledad fue tan sombria
-    F/A
+       F/A
 que no te dejo encontrar
-   C               E
+              C    E
 tu naturaleza divina.
-   Am
+            Am
 La urgencia gano esta vez,
-          F/A
+            F/A
 dispuesta a penetrarte,
-           C     E
+             C   E
 prepotente y altiva.
 
 REPITE INTRO (X6)
@@ -67,38 +67,38 @@ por las noches la soledad desespera.
 Que por las noches la soledad desespera,
                Am          F/A C
 por las noches la soledad desespera.
-       Am
+           Am
 Espera por ti,
-       F/A
+           F/A
 espera por el,
-       C
+           C
 espera por mi,
-        E
+            E
 tambien por aquel ...
 
-    Am
+        Am
 Que con violencia sujeta su alma
-  Em
+      Em
 a una brutal represion,
           G      E
 esperando apaciguarse.
-  Am
+         Am
 O confia en el paso del tiempo,
-     Em
+          Em
 como otra solucion
-     G             E
+               G   E
 para encontrar la calma.
 
 VUELVE A ARPEGIAR LOS MISMOS ACORDES
-     Am
+        Am
 Pero te pone loco en las noches,
         F/A
 rogando entrar
-   C                  E
+       C              E
 en los confines mas oscuros.
-        Am
+           Am
 Despues te arrodillas
-     F/A
+        F/A
 ante el amor maternal,
            C    E
 suplicando ternura.
@@ -121,38 +121,38 @@ Dm                 Am                G                E
 4|---0-------|    4|----2------|    4|----0------|   4|----2------|
 5|-----------|    5|---0-------|    5|-----------|   5|-----------|
 6|-----------|    6|-----------|    6|---3-------|   6|---0-------|
-       Dm
+           Dm
+Espera por ti,
+           Am
+espera por el,
+           G
+espera por mi,
+            Am
+tambien por aquel ...
+           Dm
 Espera por ti,
        Am
-espera por el,
-       G
-espera por mi,
-        Am
-tambien por aquel ...
-       Dm
-Espera por ti,
-    Am
 por el ...
-       G
+           G
 espera por mi
-        E
+            E
 tambien por aquel ...
 
 REPITE LA INTRO HASTA EL FINAL
 
-   Am                      F/A C
+       Am                  F/A C
 ¿Y que hace este angelito, ahora,
-  Am             F/A C
+      Am         F/A C
 a las seis de la mañana,
-       Am F/A C
+          Am F/A C
 subida al mastil
-   Am    F/A C
+        Am F/A C
 de este naufragio?
-   Am                          F/A C
+       Am                      F/A C
 ¿A ver si, alzando las copas, foragidas,
-      Am           F/A C
+         Am        F/A C
 viene un cielo de enfermeras
-     Am     F/A C
+            Am  F/A C
 para lamerm sin asco
     Am F/A C
 las heridas...
@@ -161,9 +161,9 @@ de amor?
 
                Am            F/A C
 Por las noches la soledad desespera...
-   Am               F/A C
+       Am           F/A C
 ¿A ver si viene del cielo
-    Am            F/A C
+              Am  F/A C
 una enfermera del amor?
                Am            F/A C
 Por las noches la soledad desespera...
