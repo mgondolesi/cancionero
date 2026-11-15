@@ -15,6 +15,7 @@
     --shadow: 0 1px 2px rgba(60,40,10,.06), 0 6px 20px rgba(60,40,10,.07);
     --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
     --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --lyric: var(--sans);
     --mono: "Inconsolata", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   }
   @media (prefers-color-scheme: dark) {
@@ -199,49 +200,65 @@
   .s-head .by { color: var(--muted); }
   .link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
   .tools {
-    display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center;
-    margin: 16px 0; padding: 12px 14px; border-radius: 18px;
+    display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 10px 16px;
+    margin: 14px 0; padding: 10px 14px 12px; border-radius: 18px;
     background: var(--surface); border: 1px solid var(--line);
   }
-  .grp { display: flex; align-items: center; gap: 6px; }
-  .grp .lbl { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
-  .grp .val { min-width: 3.4em; text-align: center; font: 700 18px var(--serif); color: var(--accent); }
+  .grp { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .grp .lbl { font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+  .ctl { display: flex; align-items: center; gap: 6px; }
+  .grp .val { min-width: 3em; text-align: center; font: 700 18px var(--serif); color: var(--accent); }
   .step {
-    width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line);
-    background: var(--bg); font-size: 18px; line-height: 1;
+    width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line);
+    background: var(--bg); font-size: 17px; line-height: 1;
   }
   .step:hover { border-color: var(--accent); }
   .step.on { border-color: var(--accent); color: var(--accent); }
-  .tools .more { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
-  pre {
-    margin: 0 0 110px; padding: 18px 16px; overflow-x: auto; background: var(--surface);
+
+  /* hoja: los acordes van sobre la sílaba y la letra se parte en renglones */
+  .sheet {
+    margin: 0; padding: 18px 16px 20px; background: var(--surface);
     border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow);
-    font: var(--fs, 17px)/1.4 var(--mono); tab-size: 4;
+    font: var(--fs, 17px)/1.4 var(--lyric); overflow-wrap: break-word;
   }
-  pre .c { color: var(--chord); font-weight: 700; }
-  pre .s { color: var(--muted); font-weight: 700; }
+  .sheet .ln { margin: 0; }
+  .sheet .ln.blank { height: .85em; }
+  .sheet .t { padding: .1em 0; }
+  .sheet .pair { padding-top: .15em; }
+  .sheet .w { white-space: nowrap; }
+  .sheet .seg { display: inline-block; vertical-align: baseline; }
+  .sheet .cc { display: block; min-height: 1.3em; padding-right: .55em; font: 700 .9em/1.3 var(--mono); color: var(--chord); }
+  .sheet .ll { display: block; white-space: pre; }
+  .sheet .cl { font: 700 .92em/1.45 var(--mono); color: var(--chord); white-space: pre-wrap; padding: .1em 0; }
+  .sheet .s { font: 700 .78em/1.3 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 1.1em 0 .25em; }
+  .sheet .raw { margin: .3em 0; overflow-x: auto; font: .82em/1.3 var(--mono); color: var(--muted); tab-size: 4; }
+  .next { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 110px; }
 
   /* ---------- deslizador ---------- */
   #as {
-    position: fixed; left: 50%; transform: translateX(-50%); z-index: 12;
-    bottom: calc(14px + env(safe-area-inset-bottom));
-    display: flex; align-items: center; gap: 6px; padding: 6px;
-    background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.28);
+    position: fixed; z-index: 12; right: max(16px, env(safe-area-inset-right));
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    display: flex; align-items: center; gap: 6px; padding: 5px;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 8px 30px rgba(0,0,0,.28);
   }
+  #as:not(.open) { padding: 0; border: 0; background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  #as:not(.open) .step, #as:not(.open) .lv { display: none; }
   #as .play {
-    width: 48px; height: 48px; border-radius: 50%; border: 0; font-size: 16px;
-    background: var(--accent); color: var(--accent-ink);
+    width: 52px; height: 52px; border-radius: 50%; border: 0; font-size: 16px;
+    background: var(--accent); color: var(--accent-ink); box-shadow: 0 6px 18px rgba(0,0,0,.28);
   }
-  #as .lv { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 76px; }
+  #as.open .play { box-shadow: none; }
+  #as .lv { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 70px; }
   #as .lv small { font-size: 12px; color: var(--muted); font-weight: 600; }
   #as .dots { display: flex; gap: 4px; }
   #as .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
   #as .dots i.on { background: var(--accent); }
 
   /* ---------- acordes tocables + ventana de diagramas ---------- */
-  pre .ch { cursor: pointer; border-radius: 3px; }
-  pre .ch:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+  .sheet .ch { cursor: pointer; border-radius: 3px; }
+  .sheet .ch:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
   .cd { position: fixed; inset: 0; z-index: 30; display: flex; align-items: flex-end; justify-content: center; }
   .cd[hidden] { display: none; }
   .cd-bg { position: absolute; inset: 0; background: rgba(0,0,0,.5); animation: fade .15s ease-out; }
@@ -308,14 +325,13 @@
   var SONGS = /*SONGS_JSON*/[]/*END_SONGS*/;
   var LOGOS = /*LOGOS_JSON*/{}/*END_LOGOS*/;   // logos de las bandas (opcional)
   var app = document.getElementById('app');
-  var state = { view: 'home', artist: '', song: '', transpose: 0, fs: 17, fit: true, q: '' };
+  var state = { view: 'home', artist: '', song: '', transpose: 0, fs: 17, q: '' };
 
   function store(k, v) {
     try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {}
     return null;
   }
   state.fs = parseInt(store('fs'), 10) || 17;
-  state.fit = store('fit') !== '0';
   var savedTheme = store('theme');
   if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
 
@@ -385,16 +401,68 @@
       });
     }).join('');
   }
+  var SECTION = /^\s*(ESTRIBILLO|VERSO|PUENTE|INTRO|SOLO|CORO)\b/;
+  // Tablatura (e|---0---|): se muestra tal cual, en monoespaciada y con scroll propio
+  function isTab(line) {
+    return /^\s*[a-g]?[|:]?[-0-9|hpbrvxsa\/\\~()^*.\s]+$/i.test(line) && (line.match(/-/g) || []).length >= 5;
+  }
+  function seg(chordHtml, text) {
+    return '<span class="seg"><span class="cc">' + chordHtml + '</span><span class="ll">' + (text || '&#8203;') + '</span></span>';
+  }
+  // Una línea de acordes + la letra de abajo: cada acorde queda sobre su sílaba y las palabras se pueden partir en renglones.
+  function pairHtml(chordLine, lyricLine, by) {
+    var lyric = lyricLine.replace(/\s+$/, '');
+    var at = {}, tail = [], m, re = /\S+/g;
+    while ((m = re.exec(chordLine))) {
+      var tok = by ? shiftToken(m[0], by) : m[0];
+      var h = chordLineHtml(tok), i = m.index;
+      while (i < lyric.length && /\s/.test(lyric.charAt(i))) i++;      // acorde sobre un espacio: va al comienzo de la palabra siguiente
+      if (i >= lyric.length) tail.push(h);
+      else at[i] = at[i] ? at[i] + ' ' + h : h;
+    }
+    var html = '', wre = /\S+|\s+/g, w;
+    while ((w = wre.exec(lyric))) {
+      var s = w[0], st = w.index;
+      if (/^\s/.test(s)) { if (html) html += ' '; continue; }
+      var parts = '', last = 0;
+      for (var k = 0; k < s.length; k++) {
+        if (at[st + k] === undefined) continue;
+        if (k > last) parts += esc(s.slice(last, k));
+        var next = s.length;
+        for (var j = k + 1; j < s.length; j++) if (at[st + j] !== undefined) { next = j; break; }
+        parts += seg(at[st + k], esc(s.slice(k, next)));
+        last = next; k = next - 1;
+      }
+      if (last < s.length) parts += esc(s.slice(last));
+      html += '<span class="w">' + parts + '</span>';
+    }
+    if (tail.length) html += ' <span class="w">' + seg(tail.join(' '), '') + '</span>';
+    return '<div class="ln pair">' + html + '</div>';
+  }
   function renderBody(body, by) {
-    return body.split('\n').map(function (line) {
+    var lines = body.split('\n'), out = [], i = 0;
+    while (i < lines.length) {
+      var line = lines[i];
+      if (!line.trim()) { out.push('<div class="ln blank"></div>'); i++; continue; }
+      if (isTab(line)) {
+        var blk = [];
+        while (i < lines.length && isTab(lines[i])) blk.push(lines[i++]);
+        out.push('<pre class="raw">' + esc(blk.join('\n')) + '</pre>');
+        continue;
+      }
       if (isChordLine(line)) {
-        return '<span class="c">' + chordLineHtml(by ? transposeLine(line, by) : line) + '</span>';
+        var nx = lines[i + 1];
+        if (nx !== undefined && nx.trim() && !isChordLine(nx) && !isTab(nx) && !SECTION.test(nx)) {
+          out.push(pairHtml(line, nx, by)); i += 2; continue;
+        }
+        out.push('<div class="ln cl">' + chordLineHtml(by ? transposeLine(line, by) : line) + '</div>');
+        i++; continue;
       }
-      if (/^\s*(ESTRIBILLO|VERSO|PUENTE|INTRO|SOLO|CORO)\b/.test(line)) {
-        return '<span class="s">' + esc(line) + '</span>';
-      }
-      return esc(line);
-    }).join('\n');
+      if (SECTION.test(line)) out.push('<div class="ln s">' + esc(line.trim()) + '</div>');
+      else out.push('<div class="ln t">' + esc(line.trim()) + '</div>');
+      i++;
+    }
+    return out.join('');
   }
   function fmtKey(k, by) {
     if (!k) return '';
@@ -566,6 +634,7 @@
   function barUpdate() {
     var el = document.getElementById('as');
     if (!el) return;
+    el.classList.toggle('open', sc.on);
     el.querySelector('[data-p]').textContent = sc.on ? '❚❚' : '▶';
     el.querySelector('[data-p]').setAttribute('aria-label', sc.on ? 'Pausar' : 'Reproducir deslizamiento');
     el.querySelector('small').textContent = 'Nivel ' + sc.level;
@@ -715,52 +784,29 @@
     return '<div class="s-head"><h1>' + esc(s.title) + '</h1>' +
       '<div class="by">de <button class="link" id="alink">' + esc(a) + '</button></div></div>' +
       '<div class="tools">' +
-        '<div class="grp"><span class="lbl">Tono</span>' +
+        '<div class="grp"><span class="lbl">Tono</span><div class="ctl">' +
           '<button class="step" data-t="-1" aria-label="Bajar un semitono">−</button>' +
           '<span class="val">' + esc(fmtKey(s.key, by) || (by > 0 ? '+' + by : String(by))) + '</span>' +
           '<button class="step" data-t="1" aria-label="Subir un semitono">+</button>' +
-          (by ? '<button class="step" data-t="0" title="Volver al tono original" aria-label="Restablecer tono">↺</button>' : '') + '</div>' +
-        '<div class="grp"><span class="lbl">Letra</span>' +
+          (by ? '<button class="step" data-t="0" title="Volver al tono original" aria-label="Restablecer tono">↺</button>' : '') + '</div></div>' +
+        '<div class="grp"><span class="lbl">Letra</span><div class="ctl">' +
           '<button class="step" data-f="-1" aria-label="Letra más chica">A−</button>' +
-          '<button class="step" data-f="1" aria-label="Letra más grande">A+</button>' +
-          '<button class="step' + (state.fit ? ' on' : '') + '" data-fit title="Ajustar al ancho de la pantalla" aria-label="Ajustar la letra al ancho" aria-pressed="' + state.fit + '">↔</button></div>' +
-        '<div class="more">' + (sibs ? '<button class="btn sm" id="again-a">Otra de ' + esc(a) + '</button>' : '') +
-          '<button class="btn sm" id="again">🎲 Al azar</button></div>' +
+          '<button class="step" data-f="1" aria-label="Letra más grande">A+</button></div></div>' +
       '</div>' +
-      '<pre style="--fs:' + state.fs + 'px">' + renderBody(s.body, by) + '</pre>' +
-      '<div id="as"><button class="play" data-p></button>' +
+      '<div class="sheet" style="--fs:' + state.fs + 'px">' + renderBody(s.body, by) + '</div>' +
+      '<div class="next">' + (sibs ? '<button class="btn" id="again-a">Otra de ' + esc(a) + '</button>' : '') +
+        '<button class="btn" id="again">🎲 Al azar</button></div>' +
+      '<div id="as">' +
         '<button class="step" data-l="-1" aria-label="Más lento">−</button>' +
         '<div class="lv"><div class="dots"><i></i><i></i><i></i><i></i><i></i></div><small></small></div>' +
-        '<button class="step" data-l="1" aria-label="Más rápido">+</button></div>';
-  }
-  // Tamaño de letra para que la línea más larga entre en el ancho disponible (sin scroll horizontal).
-  function fitSize(s) {
-    var pre = document.querySelector('pre');
-    var maxLen = 0;
-    s.body.split('\n').forEach(function (l) { if (l.length > maxLen) maxLen = l.length; });
-    var cs = getComputedStyle(pre);
-    var avail = pre.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    var m = document.createElement('span');
-    m.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font:100px ' + cs.fontFamily;
-    m.textContent = new Array(21).join('0');
-    document.body.appendChild(m);
-    var cw = m.getBoundingClientRect().width / 20 / 100;
-    document.body.removeChild(m);
-    var fit = Math.floor(avail / ((maxLen + 1) * cw) * 2) / 2;
-    return fit < 12 ? 15 : Math.min(22, fit);   // si no entra con letra legible, tamaño cómodo y scroll horizontal
-  }
-  function applyFit(s) {
-    var pre = document.querySelector('pre');
-    if (!pre) return;
-    state.fitSize = fitSize(s);
-    pre.style.setProperty('--fs', state.fitSize + 'px');
+        '<button class="step" data-l="1" aria-label="Más rápido">+</button>' +
+        '<button class="play" data-p></button></div>';
   }
   function viewSong(keepScroll) {
     var s = findSong(state.song);
     if (!s) return goHome();
     var y = window.scrollY;
     app.innerHTML = songHtml(s);
-    if (state.fit) applyFit(s);
     if (keepScroll) window.scrollTo(0, y);
     barUpdate();
     document.title = s.title + ' — Cancionero';
@@ -786,19 +832,10 @@
     });
     app.querySelectorAll('[data-f]').forEach(function (b) {
       b.onclick = function () {
-        if (state.fit) { state.fs = Math.round(state.fitSize || state.fs); state.fit = false; store('fit', '0'); }
         state.fs = Math.min(28, Math.max(10, state.fs + parseInt(b.getAttribute('data-f'), 10)));
         store('fs', String(state.fs));
         viewSong(true);
       };
-    });
-    var fb = app.querySelector('[data-fit]');
-    if (fb) fb.onclick = function () {
-      state.fit = !state.fit; store('fit', state.fit ? '1' : '0');
-      viewSong(true);
-    };
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
-      if (state.view === 'song' && state.fit) applyFit(s);
     });
   }
 
