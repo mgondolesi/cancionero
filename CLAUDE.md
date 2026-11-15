@@ -46,8 +46,9 @@ Aparte de eso, no descargues logos de la web: solo los que el usuario manda.
 - **No copies letras ni acordes de ninguna web.** Solo se agrega lo que el usuario pega o
   adjunta. No armar scrapers de La Cuerda ni de otros sitios.
 - No toques las canciones existentes salvo que el usuario lo pida.
-- Los acordes quedan alineados con la letra por los espacios: respetá los espacios y usá
-  fuente monoespaciada. No reformatees líneas de acordes.
+- En los `.txt` los acordes quedan alineados con la letra por columnas (espacios): respetá los
+  espacios y no reformatees líneas de acordes. La página lee esa alineación y pone cada acorde
+  sobre su sílaba (la letra se parte en renglones en el celular); la tablatura queda monoespaciada.
 - `index.html` se genera: no editarlo a mano. El código de la página está en `template.html`.
 - Después de cambiar `template.html` o `build.py`, probar en el navegador (Playwright está
   instalado) antes de subir.
@@ -60,4 +61,6 @@ Aparte de eso, no descargues logos de la web: solo los que el usuario manda.
 - `fill_chords.py` — copia acordes a estrofas repetidas sin acordes (`--write` para aplicar).
 - `build.py` — arma `index.html`; avisa de canciones repetidas.
 - `.github/workflows/pages.yml` — importa `inbox/`, arma el HTML y publica en Pages.
+- `pwa/` — manifest, service worker e íconos para instalar la página y usarla sin conexión (la Action los copia junto a `index.html`).
+- `fonts/` — Inconsolata (acordes), la incrusta `build.py`.
 - `design-system/` — sistema de diseño extraído de `template.html` (`tokens.json`, `README.md`, `components/`). Al cambiar colores, tipografías o componentes en `template.html`, respetalo y actualizalo. No entra en `index.html`.

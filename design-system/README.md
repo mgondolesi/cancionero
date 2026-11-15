@@ -1,4 +1,4 @@
-Cancionero es un cancionero de guitarra para leer en el teléfono: la letra en una hoja monoespaciada con los acordes encima. Se siente como papel tibio, una marca serif y un solo acento terracota. Todo el contenido está en español rioplatense.
+Cancionero es un cancionero de guitarra para leer en el teléfono: la letra con los acordes encima de cada sílaba. Se siente como papel tibio, una marca serif y un solo acento terracota. Todo el contenido está en español rioplatense.
 
 ## Fundamentos de contenido
 
