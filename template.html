@@ -413,7 +413,7 @@
   var SECTION = /^\s*(ESTRIBILLO|VERSO|PUENTE|INTRO|SOLO|CORO)\b/;
   // Tablatura (e|---0---|): se muestra tal cual, en monoespaciada y con scroll propio
   function isTab(line) {
-    return /^\s*[a-g]?[|:]?[-0-9|hpbrvxsa\/\\~()^*.\s]+$/i.test(line) && (line.match(/-/g) || []).length >= 5;
+    return /^\s*[a-g]?[|:]?[-0-9|hpbrvxsa\/\\~()^*.\s]+$/i.test(line) && (line.match(/-/g) || []).length >= 4;
   }
   function seg(chordHtml, text) {
     return '<span class="seg"><span class="cc">' + chordHtml + '</span><span class="ll">' + (text || '&#8203;') + '</span></span>';
