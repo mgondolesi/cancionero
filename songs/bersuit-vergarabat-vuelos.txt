@@ -1,0 +1,152 @@
+---
+title: Vuelos
+artist: Bersuit Vergarabat
+key: C
+---
+PARTE A
+
+Ebmaj Dsus4 C   G/B  G/Bb F/A   C
+E||-6----5----3----3----3----3----0-||
+B||-8----8----1----3----3----1----1-||
+G||-7----5----0----0----0----2----0-||
+D||-8----7----2----0----0----3----2-||
+A||-6----5----3----2----1----0----3-||
+E||-6----5----x----x----------------||
+
+PARTE B (arpegiando) x2(la 2da vez,no hacer "arreglito",
+sino G  Gsus4 G)
+
+C6/9 D#maj7 Dm7  Arreglito: G    [ Am4/7  G/B ]
+E||--3----3----5-----------------------------------||
+B||--3----3----6---------------0-------1-----3-----||
+G||--5----3----5-----------------0-------0---------||
+D||--6----5----7-------------------0---------------||
+A||--3----6----5-----------------------0-----2-----||
+E||------------x---------------3-------------------||
+
+F#          F          E     Ebmaj7
+E||------------------------------------6----||
+B||------------------------------------8----||
+G||------3-----------2----------1------7----||
+D||----4-4-4-------3-3-3------2-2-2----8----||
+A||--4-4---43----3-3---3----2-2---2----6----||
+E||--2-----------1----------0----------6----||
+
+(arpegio)
+     Dm
+E||--------------1--------------------------1-------------||
+B||--------3--------------------------3-------------------||
+G||-----2-----2---------------------2-----2---------------||
+D||--0-----------------0---0-----0------------------0-----||
+A||------------------0---3------------------------0---3---||
+E||-------------------------------------------------------||
+
+Parte A
+
+Ebmaj7         Dsus4                C
+Vos me estás mirando y yo voy a caer,
+G/B       G/Bb
+colgado en tu sién.
+F/A               C
+Vos me estás mirando y yo voy a caer.
+
+Ebmaj7    Dsus4    C
+No me ves pero ahí voy
+G/B      G/Bb
+a buscar tu prisión
+F/A           C
+de llaves que sólo cierran...
+Ebmaj7          Dsus4              C
+No ves pero ahí voy a encontrar tu prisión.
+
+Ebmaj7            Dsus4   C
+Y la bruna rebota siempre hacia aquí.
+G/B    G/Bb
+Espuma de miedo,
+F/A   C
+viejo apagón,
+Ebmaj7             Dsus4   C
+y la bruma rebota, siempre hacia aquí.
+
+Parte B
+
+C6/9
+Solo voy a volver,
+Ebmaj7
+siempre me vas a ver
+Dm7
+y cuando regrese
+G             Am4/7 G/B
+de este vuelo eterno.
+C6/9
+Solo verás en mí,
+Ebmaj7
+siempre a través de mí
+Dm7           G       Gsus4 G
+un paisaje de espanto así.
+
+F#  F   E   E
+
+(arpegio)
+Ebmaj7     Dm
+
+PARTE A:
+
+Ebmaj7 Dsus4 C
+Y el nylon abrió
+G/B      G/Bb
+sus alas por mí...
+F/A        C
+y ahora ve solo viento.
+Ebmaj7 Dsus4 C
+Y el nylon abrió
+G/B      G/Bb
+sus alas en mi.
+
+Ebmaj7  Dsus4 C
+Tu cara se borra,
+G/B     G/Bb
+se tiñe de gris,
+F/A       C
+serás una piedra sola...
+Ebmaj7 Dsus4     C
+Te desprendes de mí,
+G/B         G/Bb
+yo me quedo en vos...
+
+Ebmaj7 Dsus4    C
+Ya mis ojos son barro
+G/B   G/Bb
+en la inundación
+F/A        C
+que crece, decrece,
+Ebmaj7  Dsus4 C
+aparece y se va
+G/B        G/Bb
+y mis ojos son barro
+F/A   C
+en la inundación
+
+PARTE B:
+
+C6/9
+Solo voy a volver,
+Ebmaj7
+siempre me vas a ver
+Dm7
+y cuando regrese
+G             Am4/7 G/B
+de este vuelo eterno.
+C6/9
+Solo verás en mí,
+Ebmaj7
+siempre a través
+Dm7                 G Gsus4 G
+de mí un paisaje de espanto así.
+
+C6/9
+Sólo verás en mi
+Ebmaj7
+Siempre a través de mí
+Dm7           G       Gsus4 G
+Un paisaje de espanto espanto
